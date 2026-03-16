@@ -169,11 +169,15 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     }
 
     private var detailQuickActions: RBHomeFlowQuickActionsModel {
-        RBHomeFlowQuickActionsModel(items: [
-            .init(id: "dqa-transfer", title: "Köçürmə", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "dqa-payment", title: "Ödəniş", systemImage: "creditcard", onTap: {}),
-            .init(id: "dqa-lock", title: "Bloklama", systemImage: "lock.fill", onTap: {}),
-            .init(id: "dqa-limit", title: "Limit", systemImage: "slider.horizontal.3", onTap: {})
+        if selectedCard?.cardType == .stored {
+            return RBHomeFlowQuickActionsModel(items: [
+                .init(id: "dqa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
+            ])
+        }
+        return RBHomeFlowQuickActionsModel(items: [
+            .init(id: "dqa-transfer", title: "Karta Köçürmə", systemImage: "arrow.right.to.line", onTap: {}),
+            .init(id: "dqa-deposit", title: "Mədaxil", systemImage: "arrow.down.circle", onTap: {}),
+            .init(id: "dqa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
         ])
     }
 
