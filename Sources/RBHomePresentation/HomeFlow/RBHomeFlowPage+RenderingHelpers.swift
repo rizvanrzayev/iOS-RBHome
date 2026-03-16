@@ -21,7 +21,12 @@ extension RBHomeFlowPage {
                 onSelect: handlePrimaryItemTap,
                 onFocusChange: handlePrimaryItemFocusChange,
                 layout: .homeFlowDefault,
-                shellStyle: { _ in .preset(segment.carouselShellPreset) },
+                shellStyle: { item in
+                    if segment == .card, let bg = item.backgroundAsset {
+                        return .plasticCard(assetName: bg)
+                    }
+                    return .preset(segment.carouselShellPreset)
+                },
                 content: { item in carouselCardContent(item: item, segment: segment) },
                 detailContent: { item in
                     RBHomeFlowCarouselDetailPanel(

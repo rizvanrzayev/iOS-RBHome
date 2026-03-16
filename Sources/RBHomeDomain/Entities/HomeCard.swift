@@ -24,6 +24,9 @@ public struct HomeCard: Sendable {
     public let iban: String?
     public let cardType: HomeCardType
     public let cardNetwork: HomeCardNetwork
+    public let isPremium: Bool
+    /// Raw card product string from API (e.g. "GamerCard", "KartmaneJunior").
+    public let cardProduct: String?
     public let isLocked: Bool
     public let hasCashbackRule: Bool
 
@@ -37,6 +40,8 @@ public struct HomeCard: Sendable {
         iban: String?,
         cardType: HomeCardType,
         cardNetwork: HomeCardNetwork = .none,
+        isPremium: Bool = false,
+        cardProduct: String? = nil,
         isLocked: Bool,
         hasCashbackRule: Bool
     ) {
@@ -49,6 +54,8 @@ public struct HomeCard: Sendable {
         self.iban = iban
         self.cardType = cardType
         self.cardNetwork = cardNetwork
+        self.isPremium = isPremium
+        self.cardProduct = cardProduct
         self.isLocked = isLocked
         self.hasCashbackRule = hasCashbackRule
     }

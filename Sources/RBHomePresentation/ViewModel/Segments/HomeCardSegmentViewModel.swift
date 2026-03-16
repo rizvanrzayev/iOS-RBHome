@@ -35,7 +35,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
             if fetched.isEmpty {
                 cardsState = .empty(title: "Kart yoxdur", message: nil)
-                bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+                bonusSummaryState = .hidden
                 panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             } else {
                 cardsState = .loaded(makeCarousel(from: fetched))
@@ -43,13 +43,13 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                     selectedCardIdn = first.cardIdn
                     await loadCardDetails(cardIdn: first.cardIdn)
                 } else {
-                    bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+                    bonusSummaryState = .hidden
                     panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
                 }
             }
         } catch {
             cardsState = .error(title: "Xəta", message: error.localizedDescription)
-            bonusSummaryState = .error(title: "Xəta", message: nil)
+            bonusSummaryState = .hidden
             panelState = .error(title: "Xəta", message: nil)
         }
     }
@@ -60,7 +60,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
         if selected.cardType == .stored {
             selectedCardIdn = 0
-            bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+            bonusSummaryState = .hidden
             panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             return
         }
@@ -123,7 +123,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 title: card.name,
                 subtitle: card.maskedPan,
                 amount: amount,
-                networkAsset: card.cardNetwork.assetName
+                networkAsset: card.cardNetwork.assetName,
+                backgroundAsset: card.backgroundAsset
             )
         })
     }

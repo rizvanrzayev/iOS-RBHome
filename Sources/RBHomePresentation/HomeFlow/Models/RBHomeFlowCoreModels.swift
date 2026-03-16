@@ -41,6 +41,8 @@ public enum RBHomeFlowSectionState<Value> {
     case loaded(Value)
     case empty(title: String, message: String?)
     case error(title: String, message: String?)
+    /// Section is intentionally absent — renders nothing.
+    case hidden
 }
 
 extension RBHomeFlowSectionState: Equatable where Value: Equatable {}

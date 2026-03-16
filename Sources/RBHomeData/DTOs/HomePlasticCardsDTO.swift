@@ -35,6 +35,8 @@ struct HomePlasticCardDTO: Decodable {
     let status: Int?
     let hasCashbackRule: Bool?
     let cardDetectionType: Int?
+    let isPremium: Bool?
+    let cardProduct: String?
 
     enum CodingKeys: String, CodingKey {
         case cardIdn = "CardIdn"
@@ -47,6 +49,8 @@ struct HomePlasticCardDTO: Decodable {
         case status = "Status"
         case hasCashbackRule = "HasCashbackRule"
         case cardDetectionType = "CardDetectionType"
+        case isPremium = "IsPremium"
+        case cardProduct = "CardProduct"
     }
 
     func toEntity() -> HomeCard {
@@ -64,8 +68,6 @@ struct HomePlasticCardDTO: Decodable {
             maskedPan = pan ?? ""
         }
 
-        let network = HomeCardNetwork(detectionType: cardDetectionType)
-
         return HomeCard(
             cardIdn: cardIdn ?? 0,
             name: name ?? "",
@@ -74,7 +76,9 @@ struct HomePlasticCardDTO: Decodable {
             currency: currency ?? "",
             iban: iban,
             cardType: type,
-            cardNetwork: network,
+            cardNetwork: HomeCardNetwork(detectionType: cardDetectionType),
+            isPremium: isPremium ?? false,
+            cardProduct: cardProduct,
             isLocked: status == 3,
             hasCashbackRule: hasCashbackRule ?? false
         )

@@ -27,5 +27,7 @@ func rbHomeFlowSectionStateView<Value, Content: View>(
     case .error(let title, let message):
         RBEmptyState(title: title, message: message, layout: .inline)
             .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .top)
+    case .hidden:
+        EmptyView()
     }
 }

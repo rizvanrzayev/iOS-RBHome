@@ -55,13 +55,23 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     public let amount: String
     /// Asset name for card network logo (e.g. "ds_card_visa"). Nil for non-card segments.
     public let networkAsset: String?
+    /// Asset name for card background image. Nil uses segment default preset.
+    public let backgroundAsset: String?
 
-    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil) {
+    public init(
+        id: String,
+        title: String,
+        subtitle: String,
+        amount: String,
+        networkAsset: String? = nil,
+        backgroundAsset: String? = nil
+    ) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
         self.amount = amount
         self.networkAsset = networkAsset
+        self.backgroundAsset = backgroundAsset
     }
 }
 
