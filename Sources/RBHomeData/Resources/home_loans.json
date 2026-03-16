@@ -1,0 +1,22 @@
+{
+  "AllAccountList": [
+    {
+      "AccountNumber": "LN00001",
+      "AccountName": "İstehlak krediti",
+      "Iban": "",
+      "Amount": 3200.00,
+      "Currency": "AZN",
+      "ContractNumber": "CR-2024-001",
+      "CalcDepositInterest": 0.0
+    },
+    {
+      "AccountNumber": "LN00002",
+      "AccountName": "Avtomobil krediti",
+      "Iban": "",
+      "Amount": 18500.00,
+      "Currency": "AZN",
+      "ContractNumber": "CR-2024-002",
+      "CalcDepositInterest": 0.0
+    }
+  ]
+}

@@ -1,0 +1,25 @@
+{
+  "CreditAccountScheduleList": [
+    {
+      "PaymentDate": "2026-04-01T00:00:00",
+      "OngoingPrincipialDebt": 280.00,
+      "OngoingPenaltyDebt": 0.00,
+      "OnGoingInterestDebt": 48.00,
+      "IsOngoing": true
+    },
+    {
+      "PaymentDate": "2026-05-01T00:00:00",
+      "OngoingPrincipialDebt": 283.00,
+      "OngoingPenaltyDebt": 0.00,
+      "OnGoingInterestDebt": 45.00,
+      "IsOngoing": true
+    },
+    {
+      "PaymentDate": "2026-03-01T00:00:00",
+      "OngoingPrincipialDebt": 277.00,
+      "OngoingPenaltyDebt": 0.00,
+      "OnGoingInterestDebt": 51.00,
+      "IsOngoing": false
+    }
+  ]
+}

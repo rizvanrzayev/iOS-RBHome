@@ -1,0 +1,22 @@
+{
+  "AllAccountList": [
+    {
+      "AccountNumber": "DEP00001",
+      "AccountName": "\"Gəlirli\" əmanət",
+      "Iban": "",
+      "Amount": 10000.00,
+      "Currency": "AZN",
+      "ContractNumber": "DEP-2025-001",
+      "CalcDepositInterest": 83.33
+    },
+    {
+      "AccountNumber": "DEP00002",
+      "AccountName": "\"Optimal\" əmanət",
+      "Iban": "",
+      "Amount": 2000.00,
+      "Currency": "USD",
+      "ContractNumber": "DEP-2025-002",
+      "CalcDepositInterest": 10.00
+    }
+  ]
+}

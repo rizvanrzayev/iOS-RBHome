@@ -1,0 +1,8 @@
+{
+  "ResultCodes": "00",
+  "Description": "Success",
+  "Data": {
+    "TotalPoint": 1240.0,
+    "CurrentPoint": 28.40
+  }
+}

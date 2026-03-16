@@ -1,0 +1,32 @@
+{
+  "Statement": [
+    {
+      "OperDate": "2026-03-16T10:00:00",
+      "Title": "Köçürmə",
+      "Amount": -200.00,
+      "Currency": "AZN",
+      "PaymentSource": "Internal"
+    },
+    {
+      "OperDate": "2026-03-16T09:00:00",
+      "Title": "Hesaba daxilolma",
+      "Amount": 2400.00,
+      "Currency": "AZN",
+      "PaymentSource": "Salary"
+    },
+    {
+      "OperDate": "2026-03-15T14:00:00",
+      "Title": "Kommunal ödənişi",
+      "Amount": -34.50,
+      "Currency": "AZN",
+      "PaymentSource": "Utility"
+    },
+    {
+      "OperDate": "2026-03-14T11:00:00",
+      "Title": "Bank faizi",
+      "Amount": 12.80,
+      "Currency": "AZN",
+      "PaymentSource": "Interest"
+    }
+  ]
+}

@@ -66,7 +66,9 @@ let package = Package(
                 .product(name: "Networking", package: "iOS-RBNetworking"),
                 .product(name: "Data", package: "iOS-RBData"),
                 .product(name: "Common", package: "iOS-RBCommon"),
-            ]
+                .product(name: "Domain", package: "iOS-RBDomain"),
+            ],
+            resources: [.process("Resources")]
         ),
         .target(
             name: "RBHomePresentation",
@@ -85,6 +87,8 @@ let package = Package(
                 "RBHomeDomain",
                 "RBHomeData",
                 "RBHomePresentation",
+                .product(name: "Networking", package: "iOS-RBNetworking"),
+                .product(name: "Domain", package: "iOS-RBDomain"),
                 .product(name: "Common", package: "iOS-RBCommon"),
             ]
         ),

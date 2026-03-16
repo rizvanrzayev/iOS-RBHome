@@ -1,0 +1,37 @@
+{
+  "ListMobileUserPlasticCard": [
+    {
+      "CardIdn": 1001,
+      "Name": "RabCard Visa",
+      "Pan": "4521",
+      "Amount": 2845.60,
+      "Currency": "AZN",
+      "Iban": "AZ21RABB00000000123445210000",
+      "CardType": "D",
+      "Status": 1,
+      "HasCashbackRule": true
+    },
+    {
+      "CardIdn": 1002,
+      "Name": "Əmək haqqı kartı",
+      "Pan": "8832",
+      "Amount": 640.00,
+      "Currency": "AZN",
+      "Iban": "AZ21RABB00000000123488320000",
+      "CardType": "D",
+      "Status": 1,
+      "HasCashbackRule": false
+    },
+    {
+      "CardIdn": 1003,
+      "Name": "Dollar kartı",
+      "Pan": "1107",
+      "Amount": 320.15,
+      "Currency": "USD",
+      "Iban": null,
+      "CardType": "C",
+      "Status": 1,
+      "HasCashbackRule": false
+    }
+  ]
+}

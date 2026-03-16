@@ -1,0 +1,46 @@
+{
+  "List": [
+    {
+      "LocalDate": "2026-03-16T10:30:00",
+      "Description": "Bolt",
+      "Amount": 4.20,
+      "Currency": "AZN",
+      "TransCondition": "D"
+    },
+    {
+      "LocalDate": "2026-03-16T09:15:00",
+      "Description": "Bravo Supermarket",
+      "Amount": 18.75,
+      "Currency": "AZN",
+      "TransCondition": "D"
+    },
+    {
+      "LocalDate": "2026-03-15T18:00:00",
+      "Description": "Əmək haqqı",
+      "Amount": 1200.00,
+      "Currency": "AZN",
+      "TransCondition": "C"
+    },
+    {
+      "LocalDate": "2026-03-15T14:20:00",
+      "Description": "Netflix",
+      "Amount": 9.99,
+      "Currency": "USD",
+      "TransCondition": "D"
+    },
+    {
+      "LocalDate": "2026-03-14T20:10:00",
+      "Description": "Wolt",
+      "Amount": 12.50,
+      "Currency": "AZN",
+      "TransCondition": "D"
+    },
+    {
+      "LocalDate": "2026-03-14T16:45:00",
+      "Description": "BP Fuel",
+      "Amount": 45.00,
+      "Currency": "AZN",
+      "TransCondition": "D"
+    }
+  ]
+}

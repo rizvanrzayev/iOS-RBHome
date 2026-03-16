@@ -1,0 +1,22 @@
+{
+  "AllAccountList": [
+    {
+      "AccountNumber": "AZ00001234",
+      "AccountName": "Əsas hesab",
+      "Iban": "AZ21 RABB 0000 0000 1234 5678",
+      "Amount": 5320.00,
+      "Currency": "AZN",
+      "ContractNumber": null,
+      "CalcDepositInterest": 0.0
+    },
+    {
+      "AccountNumber": "AZ00009876",
+      "AccountName": "Dollar hesabı",
+      "Iban": "AZ21 RABB 0000 0000 9876 5432",
+      "Amount": 1050.00,
+      "Currency": "USD",
+      "ContractNumber": null,
+      "CalcDepositInterest": 0.0
+    }
+  ]
+}
