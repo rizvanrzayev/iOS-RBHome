@@ -14,6 +14,15 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     private var profileHeaderState: RBHomeFlowSectionState<RBHomeFlowProfileHeaderModel> = .loading
     private var cancellables = Set<AnyCancellable>()
 
+    /// Pending focus-change task — cancelled when user swipes to another card before it fires.
+    private var focusDebounceTask: Task<Void, Never>?
+
+    /// Delay before triggering data load after carousel focus change.
+    /// Longer on Low Power Mode to reduce background work.
+    private var focusDebounceInterval: Duration {
+        ProcessInfo.processInfo.isLowPowerModeEnabled ? .milliseconds(500) : .milliseconds(300)
+    }
+
     // package init — callers use RBHomeDIContainer.makeHomeViewModel() factory
     package init(
         fetchProfileUseCase: FetchHomeProfileUseCase,
@@ -30,7 +39,14 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     }
 
     package func onItemFocusChanged(id: String, segment: RBHomeFlowSegment) {
-        Task {
+        focusDebounceTask?.cancel()
+        focusDebounceTask = Task { [weak self] in
+            guard let self else { return }
+            do {
+                try await Task.sleep(for: focusDebounceInterval)
+            } catch {
+                return // task was cancelled — user kept swiping
+            }
             switch segment {
             case .card:    await cardSegmentVM.onCardSelected(cardId: id)
             case .account: await accountSegmentVM.onAccountSelected(accountNumber: id)
@@ -54,31 +70,19 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     }
 
     private func bindSegmentVMs() {
-        // objectWillChange fires before property updates; schedule rebuild on next run-loop cycle
-        // so rebuildPageData() sees the already-updated values.
-        cardSegmentVM.objectWillChange
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in self?.rebuildPageData() }
-            }
-            .store(in: &cancellables)
-
-        accountSegmentVM.objectWillChange
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in self?.rebuildPageData() }
-            }
-            .store(in: &cancellables)
-
-        loanSegmentVM.objectWillChange
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in self?.rebuildPageData() }
-            }
-            .store(in: &cancellables)
-
-        depositSegmentVM.objectWillChange
-            .sink { [weak self] _ in
-                Task { @MainActor [weak self] in self?.rebuildPageData() }
-            }
-            .store(in: &cancellables)
+        // Merge all segment objectWillChange publishers and debounce so that rapid
+        // successive state updates (e.g. bonusSummaryState + panelState set in one
+        // async block) produce a single rebuildPageData() call instead of two.
+        // The 16 ms window covers one display frame — imperceptible latency.
+        Publishers.MergeMany(
+            cardSegmentVM.objectWillChange.map { _ in () },
+            accountSegmentVM.objectWillChange.map { _ in () },
+            loanSegmentVM.objectWillChange.map { _ in () },
+            depositSegmentVM.objectWillChange.map { _ in () }
+        )
+        .debounce(for: .milliseconds(16), scheduler: RunLoop.main)
+        .sink { [weak self] in self?.rebuildPageData() }
+        .store(in: &cancellables)
     }
 
     private func loadProfile() async {

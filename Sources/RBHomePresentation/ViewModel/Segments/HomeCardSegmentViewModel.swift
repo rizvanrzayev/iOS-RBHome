@@ -10,6 +10,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private var cards: [HomeCard] = []
     private var selectedCardIdn: Int?
 
+    /// Cached (bonus, panel) UI models keyed by cardIdn.
+    /// Avoids re-fetching data when user swipes back to a previously seen card.
+    private var detailsCache: [Int: (bonus: RBHomeFlowBonusSummaryModel, panel: RBHomeFlowSectionState<RBHomeFlowPanelModel>)] = [:]
+
     private let fetchCardsUseCase: FetchCardsUseCase
     private let fetchTransactionsUseCase: FetchCardTransactionsUseCase
     private let fetchBonusUseCase: FetchCardBonusUseCase
@@ -66,21 +70,34 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         }
 
         selectedCardIdn = selected.cardIdn
-        bonusSummaryState = .loading
-        panelState = .loading
+        // Only show loading shimmer when data is not already cached.
+        if detailsCache[selected.cardIdn] == nil {
+            bonusSummaryState = .loading
+            panelState = .loading
+        }
         await loadCardDetails(cardIdn: selected.cardIdn)
     }
 
     private func loadCardDetails(cardIdn: Int) async {
+        // Serve from cache instantly — no loading shimmer, no network round-trip.
+        if let cached = detailsCache[cardIdn] {
+            bonusSummaryState = .loaded(cached.bonus)
+            panelState = cached.panel
+            return
+        }
+
         async let bonusResult = fetchBonusUseCase.execute(cardIdn: cardIdn)
         async let transResult = fetchTransactionsUseCase.execute(cardIdn: cardIdn)
 
         do {
             let (bonus, transactions) = try await (bonusResult, transResult)
-            bonusSummaryState = .loaded(makeBonusSummary(from: bonus))
-            panelState = transactions.isEmpty
+            let bonusModel = makeBonusSummary(from: bonus)
+            let panelModel: RBHomeFlowSectionState<RBHomeFlowPanelModel> = transactions.isEmpty
                 ? .empty(title: "Əməliyyat yoxdur", message: nil)
                 : .loaded(makePanel(from: transactions))
+            detailsCache[cardIdn] = (bonus: bonusModel, panel: panelModel)
+            bonusSummaryState = .loaded(bonusModel)
+            panelState = panelModel
         } catch {
             bonusSummaryState = .error(title: "Xəta", message: error.localizedDescription)
             panelState = .error(title: "Xəta", message: error.localizedDescription)
