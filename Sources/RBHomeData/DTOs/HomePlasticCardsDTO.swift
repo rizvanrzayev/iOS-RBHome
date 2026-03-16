@@ -3,8 +3,10 @@ import RBHomeDomain
 
 struct HomePlasticCardsResponseDTO: Decodable {
     let listMobileUserPlasticCard: [HomePlasticCardDTO]?
+    let rechargeCards: [HomeStoredCardDTO]?
     enum CodingKeys: String, CodingKey {
         case listMobileUserPlasticCard = "ListMobileUserPlasticCard"
+        case rechargeCards = "RechargeCards"
     }
 }
 

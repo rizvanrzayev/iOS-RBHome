@@ -1,11 +1,14 @@
 public enum HomeCardType: Sendable {
     case debit
     case credit
+    case stored
     case unknown
 }
 
 public struct HomeCard: Sendable {
     public let cardIdn: Int
+    /// Non-nil for stored (other-bank) cards; used as identifier in place of cardIdn.
+    public let token: String?
     public let name: String
     public let maskedPan: String
     public let amount: Double
@@ -17,6 +20,7 @@ public struct HomeCard: Sendable {
 
     public init(
         cardIdn: Int,
+        token: String? = nil,
         name: String,
         maskedPan: String,
         amount: Double,
@@ -27,6 +31,7 @@ public struct HomeCard: Sendable {
         hasCashbackRule: Bool
     ) {
         self.cardIdn = cardIdn
+        self.token = token
         self.name = name
         self.maskedPan = maskedPan
         self.amount = amount

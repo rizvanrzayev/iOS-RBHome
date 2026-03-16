@@ -28,7 +28,9 @@ package final class HomeCardRepositoryImpl: HomeCardRepository {
                 guard let self else { return }
                 switch result {
                 case .success(let response):
-                    continuation.resume(returning: response.listMobileUserPlasticCard?.map { $0.toEntity() } ?? [])
+                    let plasticCards = response.listMobileUserPlasticCard?.map { $0.toEntity() } ?? []
+                    let storedCards = response.rechargeCards?.map { $0.toEntity() } ?? []
+                    continuation.resume(returning: plasticCards + storedCards)
                 case .failure(let error):
                     continuation.resume(throwing: self.errorHandler.handle(error))
                 }

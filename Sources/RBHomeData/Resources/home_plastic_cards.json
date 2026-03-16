@@ -33,5 +33,13 @@
       "Status": 1,
       "HasCashbackRule": false
     }
+  ],
+  "RechargeCards": [
+    {
+      "Token": "tok-kapital-001",
+      "MaskedPan": "4111 **** **** 1234",
+      "BankName": "Kapital Bank",
+      "Nickname": "Kapital kartım"
+    }
   ]
 }

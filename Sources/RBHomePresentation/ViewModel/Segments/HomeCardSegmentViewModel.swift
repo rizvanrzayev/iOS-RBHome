@@ -39,9 +39,12 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             } else {
                 cardsState = .loaded(makeCarousel(from: fetched))
-                if let first = fetched.first {
+                if let first = fetched.first(where: { $0.cardType != .stored }) {
                     selectedCardIdn = first.cardIdn
                     await loadCardDetails(cardIdn: first.cardIdn)
+                } else {
+                    bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+                    panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
                 }
             }
         } catch {
@@ -52,11 +55,20 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     }
 
     func onCardSelected(cardId: String) async {
-        guard let cardIdn = Int(cardId), cardIdn != selectedCardIdn else { return }
-        selectedCardIdn = cardIdn
+        let selected = cards.first { String($0.cardIdn) == cardId || $0.token == cardId }
+        guard let selected, selected.cardIdn != selectedCardIdn || selected.token != nil else { return }
+
+        if selected.cardType == .stored {
+            selectedCardIdn = 0
+            bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+            panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
+            return
+        }
+
+        selectedCardIdn = selected.cardIdn
         bonusSummaryState = .loading
         panelState = .loading
-        await loadCardDetails(cardIdn: cardIdn)
+        await loadCardDetails(cardIdn: selected.cardIdn)
     }
 
     private func loadCardDetails(cardIdn: Int) async {
@@ -104,11 +116,13 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     private func makeCarousel(from cards: [HomeCard]) -> RBHomeFlowCarouselModel {
         RBHomeFlowCarouselModel(items: cards.map { card in
-            RBHomeFlowCarouselItem(
-                id: String(card.cardIdn),
+            let id = card.token ?? String(card.cardIdn)
+            let amount = card.cardType == .stored ? "" : HomeAmountFormatter.format(card.amount, currency: card.currency)
+            return RBHomeFlowCarouselItem(
+                id: id,
                 title: card.name,
                 subtitle: card.maskedPan,
-                amount: HomeAmountFormatter.format(card.amount, currency: card.currency)
+                amount: amount
             )
         })
     }
