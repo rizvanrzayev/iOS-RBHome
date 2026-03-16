@@ -29,6 +29,17 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
         self.depositSegmentVM = depositSegmentVM
     }
 
+    package func onItemFocusChanged(id: String, segment: RBHomeFlowSegment) {
+        Task {
+            switch segment {
+            case .card:    await cardSegmentVM.onCardSelected(cardId: id)
+            case .account: await accountSegmentVM.onAccountSelected(accountNumber: id)
+            case .credit:  await loanSegmentVM.onLoanSelected(contractNumber: id)
+            case .deposit: depositSegmentVM.onDepositSelected(accountNumber: id)
+            }
+        }
+    }
+
     public override func onAppear() {
         bindSegmentVMs()
         rebuildPageData()

@@ -53,6 +53,7 @@ extension RBHomeFlowPage {
 
         selectedProductId = id
         selectedProductIdCache[activeSegment] = id
+        onItemFocusChange?(id, activeSegment)
     }
 
     func syncVisualStateWithMode(_ mode: RBHomeFlowMode) {

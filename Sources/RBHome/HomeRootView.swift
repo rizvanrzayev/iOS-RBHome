@@ -32,7 +32,10 @@ public struct HomeRootView: View {
                 mode: mode,
                 selectedProductId: $selectedProductId,
                 onModeChange: { mode = $0 },
-                onBack: { mode = .home }
+                onBack: { mode = .home },
+                onItemFocusChange: { id, segment in
+                    viewModel.onItemFocusChanged(id: id, segment: segment)
+                }
             )
         case .loading:
             RBLoadingView()

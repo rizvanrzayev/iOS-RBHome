@@ -17,6 +17,7 @@ public struct RBHomeFlowPage: View {
     @Binding var selectedProductId: String?
     let onModeChange: (RBHomeFlowMode) -> Void
     let onBack: () -> Void
+    let onItemFocusChange: ((String, RBHomeFlowSegment) -> Void)?
 
     @State var previousActiveSegmentForCache: RBHomeFlowSegment?
     @State var activeSegment: RBHomeFlowSegment
@@ -32,13 +33,15 @@ public struct RBHomeFlowPage: View {
         initialSegment: RBHomeFlowSegment = .card,
         selectedProductId: Binding<String?>,
         onModeChange: @escaping (RBHomeFlowMode) -> Void,
-        onBack: @escaping () -> Void
+        onBack: @escaping () -> Void,
+        onItemFocusChange: ((String, RBHomeFlowSegment) -> Void)? = nil
     ) {
         self.data = data
         self.mode = mode
         self._selectedProductId = selectedProductId
         self.onModeChange = onModeChange
         self.onBack = onBack
+        self.onItemFocusChange = onItemFocusChange
         self._activeSegment = State(initialValue: initialSegment)
         self._selectedProductIdCache = State(initialValue: [:])
         self._visualMode = State(initialValue: mode)
