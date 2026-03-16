@@ -122,7 +122,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 id: id,
                 title: card.name,
                 subtitle: card.maskedPan,
-                amount: amount
+                amount: amount,
+                networkAsset: card.cardNetwork.assetName
             )
         })
     }
@@ -155,11 +156,15 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     // MARK: - Static Actions
 
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
-        RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-transfer", title: "Köçürmə", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "qa-payment", title: "Ödəniş", systemImage: "creditcard", onTap: {}),
-            .init(id: "qa-history", title: "Tarix", systemImage: "clock", onTap: {}),
-            .init(id: "qa-more", title: "Digər", systemImage: "ellipsis.circle", onTap: {})
+        if selectedCard?.cardType == .stored {
+            return RBHomeFlowQuickActionsModel(items: [
+                .init(id: "qa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
+            ])
+        }
+        return RBHomeFlowQuickActionsModel(items: [
+            .init(id: "qa-transfer", title: "Karta Köçürmə", systemImage: "arrow.right.to.line", onTap: {}),
+            .init(id: "qa-deposit", title: "Mədaxil", systemImage: "arrow.down.circle", onTap: {}),
+            .init(id: "qa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
         ])
     }
 

@@ -5,6 +5,14 @@ public enum HomeCardType: Sendable {
     case unknown
 }
 
+public enum HomeCardNetwork: Sendable {
+    case visa
+    case mastercard
+    case maestro
+    case discover
+    case none
+}
+
 public struct HomeCard: Sendable {
     public let cardIdn: Int
     /// Non-nil for stored (other-bank) cards; used as identifier in place of cardIdn.
@@ -15,6 +23,7 @@ public struct HomeCard: Sendable {
     public let currency: String
     public let iban: String?
     public let cardType: HomeCardType
+    public let cardNetwork: HomeCardNetwork
     public let isLocked: Bool
     public let hasCashbackRule: Bool
 
@@ -27,6 +36,7 @@ public struct HomeCard: Sendable {
         currency: String,
         iban: String?,
         cardType: HomeCardType,
+        cardNetwork: HomeCardNetwork = .none,
         isLocked: Bool,
         hasCashbackRule: Bool
     ) {
@@ -38,6 +48,7 @@ public struct HomeCard: Sendable {
         self.currency = currency
         self.iban = iban
         self.cardType = cardType
+        self.cardNetwork = cardNetwork
         self.isLocked = isLocked
         self.hasCashbackRule = hasCashbackRule
     }

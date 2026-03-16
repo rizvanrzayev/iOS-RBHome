@@ -45,9 +45,7 @@ extension RBHomeFlowPage {
                     amount: amountText(item.amount),
                     title: item.title,
                     maskedNumber: .init(item.subtitle),
-                    brandText: nil,
-                    badge: nil,
-                    secondaryNote: nil,
+                    brandImageName: item.networkAsset,
                     trailingIcons: .init(showsEye: false, showsFavorite: false)
                 )
             )

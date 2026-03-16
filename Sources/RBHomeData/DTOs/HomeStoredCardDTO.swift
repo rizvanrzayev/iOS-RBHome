@@ -5,12 +5,14 @@ struct HomeStoredCardDTO: Decodable {
     let maskedPan: String?
     let bankName: String?
     let nickname: String?
+    let cardDetectionType: Int?
 
     enum CodingKeys: String, CodingKey {
         case token = "Token"
         case maskedPan = "MaskedPan"
         case bankName = "BankName"
         case nickname = "Nickname"
+        case cardDetectionType = "CardDetectionType"
     }
 
     func toEntity() -> HomeCard {
@@ -23,6 +25,7 @@ struct HomeStoredCardDTO: Decodable {
             currency: "",
             iban: nil,
             cardType: .stored,
+            cardNetwork: HomeCardNetwork(detectionType: cardDetectionType),
             isLocked: false,
             hasCashbackRule: false
         )

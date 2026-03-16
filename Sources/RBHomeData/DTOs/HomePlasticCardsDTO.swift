@@ -1,6 +1,20 @@
 import Foundation
 import RBHomeDomain
 
+extension HomeCardNetwork {
+    /// Maps backend `CardDetectionType` integer to domain network enum.
+    /// 0=Maestro, 1=Mastercard, 2=Visa, 3=VisaMastercard→Visa, 4=Discover, 5/nil=None
+    init(detectionType: Int?) {
+        switch detectionType {
+        case 0: self = .maestro
+        case 1: self = .mastercard
+        case 2, 3: self = .visa
+        case 4: self = .discover
+        default: self = .none
+        }
+    }
+}
+
 struct HomePlasticCardsResponseDTO: Decodable {
     let listMobileUserPlasticCard: [HomePlasticCardDTO]?
     let rechargeCards: [HomeStoredCardDTO]?
@@ -20,6 +34,7 @@ struct HomePlasticCardDTO: Decodable {
     let cardType: String?
     let status: Int?
     let hasCashbackRule: Bool?
+    let cardDetectionType: Int?
 
     enum CodingKeys: String, CodingKey {
         case cardIdn = "CardIdn"
@@ -31,6 +46,7 @@ struct HomePlasticCardDTO: Decodable {
         case cardType = "CardType"
         case status = "Status"
         case hasCashbackRule = "HasCashbackRule"
+        case cardDetectionType = "CardDetectionType"
     }
 
     func toEntity() -> HomeCard {
@@ -48,6 +64,8 @@ struct HomePlasticCardDTO: Decodable {
             maskedPan = pan ?? ""
         }
 
+        let network = HomeCardNetwork(detectionType: cardDetectionType)
+
         return HomeCard(
             cardIdn: cardIdn ?? 0,
             name: name ?? "",
@@ -56,6 +74,7 @@ struct HomePlasticCardDTO: Decodable {
             currency: currency ?? "",
             iban: iban,
             cardType: type,
+            cardNetwork: network,
             isLocked: status == 3,
             hasCashbackRule: hasCashbackRule ?? false
         )

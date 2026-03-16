@@ -9,7 +9,8 @@
       "Iban": "AZ21RABB00000000123445210000",
       "CardType": "D",
       "Status": 1,
-      "HasCashbackRule": true
+      "HasCashbackRule": true,
+      "CardDetectionType": 2
     },
     {
       "CardIdn": 1002,
@@ -20,7 +21,8 @@
       "Iban": "AZ21RABB00000000123488320000",
       "CardType": "D",
       "Status": 1,
-      "HasCashbackRule": false
+      "HasCashbackRule": false,
+      "CardDetectionType": 1
     },
     {
       "CardIdn": 1003,
@@ -31,7 +33,8 @@
       "Iban": null,
       "CardType": "C",
       "Status": 1,
-      "HasCashbackRule": false
+      "HasCashbackRule": false,
+      "CardDetectionType": 2
     }
   ],
   "RechargeCards": [
@@ -39,7 +42,8 @@
       "Token": "tok-kapital-001",
       "MaskedPan": "4111 **** **** 1234",
       "BankName": "Kapital Bank",
-      "Nickname": "Kapital kartım"
+      "Nickname": "Kapital kartım",
+      "CardDetectionType": 2
     }
   ]
 }
