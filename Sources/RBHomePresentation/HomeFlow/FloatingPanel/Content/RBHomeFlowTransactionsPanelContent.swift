@@ -28,6 +28,8 @@ struct RBHomeFlowTransactionsPanelContent: View {
             RBEmptyState(title: title, message: message, layout: .inline)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 16)
+        case .hidden:
+            EmptyView()
         }
     }
 
