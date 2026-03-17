@@ -10,7 +10,14 @@ import RBDesignSystem
 
 public struct RBHomeFlowPage: View {
     static let transitionAnimationDuration: Double = 0.38
-    static let transitionAnimation: Animation = .spring(response: transitionAnimationDuration, dampingFraction: 0.9)
+
+    /// Animation for home↔detail transitions.
+    /// Uses a simpler, shorter curve on Low Power Mode to reduce per-frame GPU work.
+    static var transitionAnimation: Animation {
+        ProcessInfo.processInfo.isLowPowerModeEnabled
+            ? .easeInOut(duration: 0.2)
+            : .spring(response: transitionAnimationDuration, dampingFraction: 0.9)
+    }
 
     let data: RBHomeFlowPageData
     let mode: RBHomeFlowMode

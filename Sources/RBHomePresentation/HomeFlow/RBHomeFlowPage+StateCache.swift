@@ -6,6 +6,7 @@
 //
 
 import SwiftUI
+import UIKit
 import RBDesignSystem
 
 extension RBHomeFlowPage {
@@ -73,11 +74,15 @@ extension RBHomeFlowPage {
             panelCollapseToken = UUID()
         }
 
-        withAnimation(RBHomeFlowPage.transitionAnimation) {
+        let reduceMotion = UIAccessibility.isReduceMotionEnabled
+        let animation: Animation? = reduceMotion ? nil : RBHomeFlowPage.transitionAnimation
+
+        withAnimation(animation) {
             visualMode = targetMode
             detailRevealProgress = targetMode == .detail ? 1 : 0
         }
 
+        guard !reduceMotion else { return }
         let hapticDelay = RBHomeFlowPage.transitionAnimationDuration * 0.85
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(hapticDelay * 1_000_000_000))

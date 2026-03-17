@@ -111,6 +111,10 @@ extension RBHomeFlowPage {
             .animation(RBHomeFlowPage.transitionAnimation, value: visualMode)
             .allowsHitTesting(visualMode == .detail)
         }
+        // Rasterise both bodies into a single Metal texture.
+        // Core Animation handles the opacity crossfade without SwiftUI
+        // re-evaluating quick actions, bonus, and panel on every frame.
+        .drawingGroup()
     }
 
     @ViewBuilder
