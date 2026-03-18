@@ -15,6 +15,7 @@ struct RBHomeFlowQuickActionsSkeleton: View {
                         .fill(Color(hex: "#F0F1F5"))
                         .frame(width: 52, height: 52)
                         .rbShimmer()
+                        .clipShape(Circle())
                     RBShimmerBox(cornerRadius: 4)
                         .frame(width: 48, height: 14)
                 }

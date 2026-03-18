@@ -18,6 +18,7 @@ struct RBHomeFlowHeaderSkeleton: View {
                 .fill(shimmerColor)
                 .frame(width: 40, height: 40)
                 .rbShimmer()
+                .clipShape(Circle())
 
             // Name bar
             RBShimmerBox(cornerRadius: 4)
@@ -31,6 +32,7 @@ struct RBHomeFlowHeaderSkeleton: View {
                     .fill(shimmerColor)
                     .frame(width: 36, height: 36)
                     .rbShimmer()
+                    .clipShape(Circle())
             }
         }
     }
