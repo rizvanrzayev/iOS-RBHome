@@ -117,9 +117,11 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     // MARK: - Computed UI Models
 
     var homeModel: RBHomeFlowCardHomeModel {
-        RBHomeFlowCardHomeModel(
+        let qaState: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>
+        if case .loading = cardsState { qaState = .loading } else { qaState = .loaded(homeQuickActions) }
+        return RBHomeFlowCardHomeModel(
             cardsState: cardsState,
-            quickActionsState: .loaded(homeQuickActions),
+            quickActionsState: qaState,
             bonusSummaryState: bonusSummaryState,
             panelState: panelState
         )
@@ -127,10 +129,12 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     var detailModel: RBHomeFlowCardDetailModel {
         let title = selectedCard?.name ?? "Kart"
+        let qaState: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>
+        if case .loading = cardsState { qaState = .loading } else { qaState = .loaded(detailQuickActions) }
         return RBHomeFlowCardDetailModel(
             title: title,
             cardsState: cardsState,
-            quickActionsState: .loaded(detailQuickActions),
+            quickActionsState: qaState,
             actionsState: .loaded(cardServiceActions)
         )
     }
