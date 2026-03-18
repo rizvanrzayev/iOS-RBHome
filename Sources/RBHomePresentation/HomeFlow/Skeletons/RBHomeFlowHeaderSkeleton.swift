@@ -26,8 +26,8 @@ struct RBHomeFlowHeaderSkeleton: View {
 
             Spacer(minLength: 0)
 
-            // Action button placeholders (scan + notification)
-            ForEach(0..<2, id: \.self) { _ in
+            // Action button placeholders (scan + chat + notification)
+            ForEach(0..<3, id: \.self) { _ in
                 Circle()
                     .fill(shimmerColor)
                     .frame(width: 36, height: 36)

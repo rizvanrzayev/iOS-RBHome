@@ -29,6 +29,7 @@ public struct RBHomeFlowProfileHeaderModel {
     public let fullName: String
     public let avatarAction: (() -> Void)?
     public let qrAction: RBHomeFlowProfileHeaderAction?
+    public let chatAction: RBHomeFlowProfileHeaderAction?
     public let notificationAction: RBHomeFlowProfileHeaderAction?
 
     public init(
@@ -36,12 +37,14 @@ public struct RBHomeFlowProfileHeaderModel {
         fullName: String,
         avatarAction: (() -> Void)? = nil,
         qrAction: RBHomeFlowProfileHeaderAction? = nil,
+        chatAction: RBHomeFlowProfileHeaderAction? = nil,
         notificationAction: RBHomeFlowProfileHeaderAction? = nil
     ) {
         self.avatarText = avatarText
         self.fullName = fullName
         self.avatarAction = avatarAction
         self.qrAction = qrAction
+        self.chatAction = chatAction
         self.notificationAction = notificationAction
     }
 }

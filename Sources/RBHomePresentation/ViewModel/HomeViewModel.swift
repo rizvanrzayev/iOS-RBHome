@@ -86,11 +86,13 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
             let data = try await fetchProfileUseCase.execute()
             let profile = data.profile
             let count = data.notificationCount.unreadCount
+            let notificationIcon: RBIcon = count > 0 ? .iconNotificationBadge : .iconNotification
             profileHeaderState = .loaded(RBHomeFlowProfileHeaderModel(
                 avatarText: profile.initials,
                 fullName: profile.fullName,
                 qrAction: RBHomeFlowProfileHeaderAction(icon: .iconScan, onTap: {}),
-                notificationAction: RBHomeFlowProfileHeaderAction(icon: .iconNotification, onTap: {})
+                chatAction: RBHomeFlowProfileHeaderAction(icon: .iconChat, onTap: {}),
+                notificationAction: RBHomeFlowProfileHeaderAction(icon: notificationIcon, onTap: {})
             ))
         } catch {
             let defaults = UserDefaults.standard

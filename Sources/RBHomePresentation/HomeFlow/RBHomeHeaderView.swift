@@ -12,7 +12,7 @@ struct RBHomeHeaderView: View {
     let model: RBHomeFlowProfileHeaderModel
 
     private var actions: [RBHomeFlowProfileHeaderAction] {
-        [model.qrAction, model.notificationAction].compactMap { $0 }
+        [model.qrAction, model.chatAction, model.notificationAction].compactMap { $0 }
     }
 
     var body: some View {
@@ -61,16 +61,8 @@ struct RBHomeHeaderView: View {
 
     private func actionButton(_ action: RBHomeFlowProfileHeaderAction) -> some View {
         Button(action: action.onTap) {
-            Circle()
-                .fill(Color.white)
+            action.icon.view(size: .small, color: Color.rb.textPrimary)
                 .frame(width: 36, height: 36)
-                .overlay {
-                    Circle()
-                        .stroke(Color.rb.separator, lineWidth: 1)
-                }
-                .overlay {
-                    action.icon.view(size: .small, color: Color.rb.textPrimary)
-                }
         }
         .buttonStyle(.plain)
     }
