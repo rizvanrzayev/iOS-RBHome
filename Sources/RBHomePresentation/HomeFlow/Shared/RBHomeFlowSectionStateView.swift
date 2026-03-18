@@ -18,7 +18,7 @@ func rbHomeFlowSectionStateView<Value, Content: View, Skeleton: View>(
     switch state {
     case .loading:
         skeleton()
-            .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .center)
+            .frame(maxWidth: .infinity, alignment: .center)
     case .loaded(let value):
         content(value)
             .frame(maxWidth: .infinity, alignment: .leading)
