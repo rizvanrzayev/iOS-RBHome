@@ -27,12 +27,14 @@ struct RBHomeFlowHeaderSkeleton: View {
             Spacer(minLength: 0)
 
             // Action button placeholders (scan + chat + notification)
-            ForEach(0..<3, id: \.self) { _ in
-                Circle()
-                    .fill(shimmerColor)
-                    .frame(width: 36, height: 36)
-                    .rbShimmer()
-                    .clipShape(Circle())
+            HStack(spacing: 16) {
+                ForEach(0..<3, id: \.self) { _ in
+                    Circle()
+                        .fill(shimmerColor)
+                        .frame(width: 24, height: 24)
+                        .rbShimmer()
+                        .clipShape(Circle())
+                }
             }
         }
     }

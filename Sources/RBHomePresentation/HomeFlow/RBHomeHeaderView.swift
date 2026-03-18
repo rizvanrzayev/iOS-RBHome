@@ -26,8 +26,10 @@ struct RBHomeHeaderView: View {
 
             Spacer(minLength: 0)
 
-            ForEach(Array(actions.enumerated()), id: \.offset) { _, action in
-                actionButton(action)
+            HStack(spacing: 16) {
+                ForEach(Array(actions.enumerated()), id: \.offset) { _, action in
+                    actionButton(action)
+                }
             }
         }
     }
@@ -61,8 +63,8 @@ struct RBHomeHeaderView: View {
 
     private func actionButton(_ action: RBHomeFlowProfileHeaderAction) -> some View {
         Button(action: action.onTap) {
-            action.icon.view(size: .small, color: Color.rb.textPrimary)
-                .frame(width: 36, height: 36)
+            action.icon.view(size: .custom(24), color: Color.rb.textPrimary)
+                .frame(width: 24, height: 24)
         }
         .buttonStyle(.plain)
     }
