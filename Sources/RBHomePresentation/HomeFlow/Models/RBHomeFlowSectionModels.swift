@@ -11,12 +11,16 @@ import RBDesignSystem
 // MARK: - Profile Header
 
 public struct RBHomeFlowProfileHeaderAction {
-    public let systemImage: String
+    public let icon: RBIcon
     public let onTap: () -> Void
 
-    public init(systemImage: String, onTap: @escaping () -> Void) {
-        self.systemImage = systemImage
+    public init(icon: RBIcon, onTap: @escaping () -> Void) {
+        self.icon = icon
         self.onTap = onTap
+    }
+
+    public init(systemImage: String, onTap: @escaping () -> Void) {
+        self.init(icon: .system(systemImage), onTap: onTap)
     }
 }
 
@@ -55,23 +59,16 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     public let amount: String
     /// Asset name for card network logo (e.g. "ds_card_visa"). Nil for non-card segments.
     public let networkAsset: String?
-    /// Asset name for card background image. Nil uses segment default preset.
-    public let backgroundAsset: String?
+    /// Optional label shown at the bottom-leading corner of the card (e.g. "Bonus: 120 xal").
+    public let bottomLeadingLabel: String?
 
-    public init(
-        id: String,
-        title: String,
-        subtitle: String,
-        amount: String,
-        networkAsset: String? = nil,
-        backgroundAsset: String? = nil
-    ) {
+    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil, bottomLeadingLabel: String? = nil) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
         self.amount = amount
         self.networkAsset = networkAsset
-        self.backgroundAsset = backgroundAsset
+        self.bottomLeadingLabel = bottomLeadingLabel
     }
 }
 
@@ -94,13 +91,13 @@ extension RBHomeFlowCarouselModel: RBHomeFlowCarouselCollection {
 public struct RBHomeFlowQuickActionItem: Identifiable {
     public let id: String
     public let title: String
-    public let systemImage: String
+    public let icon: RBIcon
     public let onTap: () -> Void
 
-    public init(id: String, title: String, systemImage: String, onTap: @escaping () -> Void) {
+    public init(id: String, title: String, icon: RBIcon, onTap: @escaping () -> Void) {
         self.id = id
         self.title = title
-        self.systemImage = systemImage
+        self.icon = icon
         self.onTap = onTap
     }
 }
@@ -145,15 +142,19 @@ public struct RBHomeFlowDetailActionItem: Identifiable {
     public let id: String
     public let title: String
     public let description: String
-    public let systemImage: String
+    public let icon: RBIcon
     public let onTap: () -> Void
 
-    public init(id: String, title: String, description: String, systemImage: String, onTap: @escaping () -> Void) {
+    public init(id: String, title: String, description: String, icon: RBIcon, onTap: @escaping () -> Void) {
         self.id = id
         self.title = title
         self.description = description
-        self.systemImage = systemImage
+        self.icon = icon
         self.onTap = onTap
+    }
+
+    public init(id: String, title: String, description: String, systemImage: String, onTap: @escaping () -> Void) {
+        self.init(id: id, title: title, description: description, icon: .system(systemImage), onTap: onTap)
     }
 }
 
@@ -213,11 +214,36 @@ public struct RBHomeFlowPanelItem: Identifiable {
     }
 }
 
-public enum RBHomeFlowPanelFilter {
+public enum RBHomeFlowPanelFilter: Equatable {
     case today
     case thisWeek
     case thisMonth
     case custom(from: Date, to: Date)
+}
+
+extension RBHomeFlowPanelFilter {
+    var dateRange: (from: Date, to: Date) {
+        let cal = Calendar.current
+        let now = Date()
+        switch self {
+        case .today:
+            let start = cal.startOfDay(for: now)
+            let end = cal.date(byAdding: DateComponents(day: 1, second: -1), to: start)!
+            return (start, end)
+        case .thisWeek:
+            let start = cal.date(from: cal.dateComponents([.yearForWeekOfYear, .weekOfYear], from: now))!
+            let end = cal.date(byAdding: DateComponents(day: 7, second: -1), to: start)!
+            return (start, end)
+        case .thisMonth:
+            let start = cal.date(from: cal.dateComponents([.year, .month], from: now))!
+            let end = cal.date(byAdding: DateComponents(month: 1, second: -1), to: start)!
+            return (start, end)
+        case .custom(let from, let to):
+            let start = cal.startOfDay(for: from)
+            let end = cal.date(byAdding: DateComponents(day: 1, second: -1), to: cal.startOfDay(for: to))!
+            return (start, end)
+        }
+    }
 }
 
 public struct RBHomeFlowPanelModel {

@@ -22,7 +22,7 @@ struct RBHomeFlowQuickActionsSectionView: View {
             HStack(spacing: 0) {
                 ForEach(model.items) { item in
                     RBQuickActionButton(
-                        icon: .system(item.systemImage),
+                        icon: item.icon,
                         title: item.title,
                         style: .primary,
                         buttonSize: 52,

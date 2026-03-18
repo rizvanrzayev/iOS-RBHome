@@ -8,6 +8,7 @@ package final class FetchLoansUseCaseImpl: FetchLoansUseCase {
     }
 
     package func execute() async throws -> [HomeLoan] {
-        try await repository.fetchLoans()
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        return try await repository.fetchLoans()
     }
 }

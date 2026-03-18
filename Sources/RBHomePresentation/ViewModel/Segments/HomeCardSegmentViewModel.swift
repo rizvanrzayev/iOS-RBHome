@@ -9,10 +9,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     private var cards: [HomeCard] = []
     private var selectedCardIdn: Int?
-
-    /// Cached (bonus, panel) UI models keyed by cardIdn.
-    /// Avoids re-fetching data when user swipes back to a previously seen card.
-    private var detailsCache: [Int: (bonus: RBHomeFlowBonusSummaryModel, panel: RBHomeFlowSectionState<RBHomeFlowPanelModel>)] = [:]
+    private var bonusPerCard: [Int: HomeCardBonusPoint] = [:]
+    private var rawTransactions: [HomeCardTransaction] = []
+    private var panelSearchText: String = ""
+    private var panelDateFilter: RBHomeFlowPanelFilter? = nil
 
     private let fetchCardsUseCase: FetchCardsUseCase
     private let fetchTransactionsUseCase: FetchCardTransactionsUseCase
@@ -39,7 +39,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
             if fetched.isEmpty {
                 cardsState = .empty(title: "Kart yoxdur", message: nil)
-                bonusSummaryState = .hidden
+                bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
                 panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             } else {
                 cardsState = .loaded(makeCarousel(from: fetched))
@@ -47,13 +47,13 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                     selectedCardIdn = first.cardIdn
                     await loadCardDetails(cardIdn: first.cardIdn)
                 } else {
-                    bonusSummaryState = .hidden
+                    bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
                     panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
                 }
             }
         } catch {
             cardsState = .error(title: "Xəta", message: error.localizedDescription)
-            bonusSummaryState = .hidden
+            bonusSummaryState = .error(title: "Xəta", message: nil)
             panelState = .error(title: "Xəta", message: nil)
         }
     }
@@ -64,44 +64,54 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
         if selected.cardType == .stored {
             selectedCardIdn = 0
-            bonusSummaryState = .hidden
+            bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
             panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             return
         }
 
         selectedCardIdn = selected.cardIdn
-        // Only show loading shimmer when data is not already cached.
-        if detailsCache[selected.cardIdn] == nil {
-            bonusSummaryState = .loading
-            panelState = .loading
-        }
+        bonusSummaryState = .loading
+        panelState = .loading
         await loadCardDetails(cardIdn: selected.cardIdn)
     }
 
     private func loadCardDetails(cardIdn: Int) async {
-        // Serve from cache instantly — no loading shimmer, no network round-trip.
-        if let cached = detailsCache[cardIdn] {
-            bonusSummaryState = .loaded(cached.bonus)
-            panelState = cached.panel
-            return
-        }
-
         async let bonusResult = fetchBonusUseCase.execute(cardIdn: cardIdn)
         async let transResult = fetchTransactionsUseCase.execute(cardIdn: cardIdn)
 
         do {
             let (bonus, transactions) = try await (bonusResult, transResult)
-            let bonusModel = makeBonusSummary(from: bonus)
-            let panelModel: RBHomeFlowSectionState<RBHomeFlowPanelModel> = transactions.isEmpty
-                ? .empty(title: "Əməliyyat yoxdur", message: nil)
-                : .loaded(makePanel(from: transactions))
-            detailsCache[cardIdn] = (bonus: bonusModel, panel: panelModel)
-            bonusSummaryState = .loaded(bonusModel)
-            panelState = panelModel
+            bonusPerCard[cardIdn] = bonus
+            bonusSummaryState = .loaded(makeBonusSummary(from: bonus))
+            rawTransactions = transactions
+            panelSearchText = ""
+            panelDateFilter = nil
+            rebuildCarousel()
+            rebuildPanel()
         } catch {
             bonusSummaryState = .error(title: "Xəta", message: error.localizedDescription)
             panelState = .error(title: "Xəta", message: error.localizedDescription)
         }
+    }
+
+    private func rebuildCarousel() {
+        cardsState = .loaded(makeCarousel(from: cards))
+    }
+
+    private func rebuildPanel() {
+        panelState = .loaded(makePanel(from: filteredTransactions()))
+    }
+
+    private func filteredTransactions() -> [HomeCardTransaction] {
+        var list = rawTransactions
+        if !panelSearchText.isEmpty {
+            list = list.filter { $0.title.localizedCaseInsensitiveContains(panelSearchText) }
+        }
+        if let filter = panelDateFilter {
+            let range = filter.dateRange
+            list = list.filter { $0.localDate >= range.from && $0.localDate <= range.to }
+        }
+        return list
     }
 
     // MARK: - Computed UI Models
@@ -135,15 +145,31 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         RBHomeFlowCarouselModel(items: cards.map { card in
             let id = card.token ?? String(card.cardIdn)
             let amount = card.cardType == .stored ? "" : HomeAmountFormatter.format(card.amount, currency: card.currency)
+            let bottomLeadingLabel = cardLabel(for: card)
             return RBHomeFlowCarouselItem(
                 id: id,
                 title: card.name,
                 subtitle: card.maskedPan,
                 amount: amount,
                 networkAsset: card.cardNetwork.assetName,
-                backgroundAsset: card.backgroundAsset
+                bottomLeadingLabel: bottomLeadingLabel
             )
         })
+    }
+
+    private func cardLabel(for card: HomeCard) -> String? {
+        guard card.cardType != .stored else { return nil }
+        let currency = card.currency
+        if card.installmentCard, let monthly = card.monthlyDebt, monthly > 0 {
+            return "Aylıq ödəniş: \(HomeAmountFormatter.format(monthly, currency: currency))"
+        }
+        if card.cardType == .credit, let minPay = card.minimumPayment, minPay > 0 {
+            return "Min ödəniş: \(HomeAmountFormatter.format(minPay, currency: currency))"
+        }
+        if let interest = card.interestAmount, interest > 0 {
+            return "Faiz: \(HomeAmountFormatter.format(interest, currency: currency))"
+        }
+        return nil
     }
 
     private func makeBonusSummary(from bonus: HomeCardBonusPoint) -> RBHomeFlowBonusSummaryModel {
@@ -167,6 +193,14 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                     amount: "\(sign)\(HomeAmountFormatter.format(tx.amount, currency: tx.currency))",
                     isCredit: tx.isCredit
                 )
+            },
+            onSearchChange: { [weak self] text in
+                self?.panelSearchText = text
+                self?.rebuildPanel()
+            },
+            onFilterChange: { [weak self] filter in
+                self?.panelDateFilter = filter
+                self?.rebuildPanel()
             }
         )
     }
@@ -176,39 +210,39 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         if selectedCard?.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "qa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
+                .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
             ])
         }
         return RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-transfer", title: "Karta Köçürmə", systemImage: "arrow.right.to.line", onTap: {}),
-            .init(id: "qa-deposit", title: "Mədaxil", systemImage: "arrow.down.circle", onTap: {}),
-            .init(id: "qa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
+            .init(id: "qa-transfer", title: "Karta Köçürmə", icon: .custom(.actionTransfer), onTap: {}),
+            .init(id: "qa-deposit", title: "Mədaxil", icon: .custom(.actionTopup), onTap: {}),
+            .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
         ])
     }
 
     private var detailQuickActions: RBHomeFlowQuickActionsModel {
         if selectedCard?.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "dqa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
+                .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
             ])
         }
         return RBHomeFlowQuickActionsModel(items: [
-            .init(id: "dqa-transfer", title: "Karta Köçürmə", systemImage: "arrow.right.to.line", onTap: {}),
-            .init(id: "dqa-deposit", title: "Mədaxil", systemImage: "arrow.down.circle", onTap: {}),
-            .init(id: "dqa-payment", title: "Ödənişlər", systemImage: "creditcard", onTap: {})
+            .init(id: "dqa-transfer", title: "Karta Köçürmə", icon: .custom(.actionTransfer), onTap: {}),
+            .init(id: "dqa-deposit", title: "Mədaxil", icon: .custom(.actionTopup), onTap: {}),
+            .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
         ])
     }
 
     private var cardServiceActions: RBHomeFlowDetailActionsModel {
         RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: [
             .init(id: "svc-lock", title: "Kartı blokla",
-                  description: "Müvəqqəti istifadəni dayandır", systemImage: "lock.fill", onTap: {}),
+                  description: "Müvəqqəti istifadəni dayandır", icon: .iconLock, onTap: {}),
             .init(id: "svc-limit", title: "Limit idarəetməsi",
-                  description: "Gündəlik xərcləmə limitini dəyiş", systemImage: "slider.horizontal.3", onTap: {}),
+                  description: "Gündəlik xərcləmə limitini dəyiş", icon: .iconFilterAdvanced, onTap: {}),
             .init(id: "svc-details", title: "Kart rekvizitləri",
-                  description: "Tam kart məlumatlarını gör", systemImage: "doc.text.fill", onTap: {}),
+                  description: "Tam kart məlumatlarını gör", icon: .iconPaper, onTap: {}),
             .init(id: "svc-statement", title: "Çıxarış sifariş et",
-                  description: "Hesab çıxarışını yüklə", systemImage: "arrow.down.doc.fill", onTap: {})
+                  description: "Hesab çıxarışını yüklə", icon: .iconPaperUpload, onTap: {})
         ])
     }
 }

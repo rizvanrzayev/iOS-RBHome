@@ -13,7 +13,7 @@ extension RBHomeFlowPage {
         state: RBHomeFlowSectionState<RBHomeFlowCarouselModel>,
         segment: RBHomeFlowSegment
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 162) { model in
+        rbHomeFlowSectionStateView(state, minHeight: 162, skeleton: { RBHomeFlowCarouselSkeleton().padding(.horizontal, -RBHomeFlowLayout.pageHorizontalInset) }) { model in
             RBHomeFlowProductCarouselSectionView(
                 items: model.items,
                 selectedId: selectedProductId,
@@ -21,12 +21,7 @@ extension RBHomeFlowPage {
                 onSelect: handlePrimaryItemTap,
                 onFocusChange: handlePrimaryItemFocusChange,
                 layout: .homeFlowDefault,
-                shellStyle: { item in
-                    if segment == .card, let bg = item.backgroundAsset {
-                        return .plasticCard(assetName: bg)
-                    }
-                    return .preset(segment.carouselShellPreset)
-                },
+                shellStyle: { _ in .preset(segment.carouselShellPreset) },
                 content: { item in carouselCardContent(item: item, segment: segment) },
                 detailContent: { item in
                     RBHomeFlowCarouselDetailPanel(
@@ -51,7 +46,8 @@ extension RBHomeFlowPage {
                     title: item.title,
                     maskedNumber: .init(item.subtitle),
                     brandImageName: item.networkAsset,
-                    trailingIcons: .init(showsEye: false, showsFavorite: false)
+                    trailingIcons: .init(showsEye: false, showsFavorite: false),
+                    bottomLeadingLabel: item.bottomLeadingLabel
                 )
             )
         case .account, .credit, .deposit:
@@ -69,7 +65,7 @@ extension RBHomeFlowPage {
     func quickActionsSection(
         state: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 100) { model in
+        rbHomeFlowSectionStateView(state, minHeight: 100, skeleton: { RBHomeFlowQuickActionsSkeleton() }) { model in
             RBHomeFlowQuickActionsSectionView(model: model)
         }
     }
@@ -77,7 +73,7 @@ extension RBHomeFlowPage {
     func bonusSummarySection(
         state: RBHomeFlowSectionState<RBHomeFlowBonusSummaryModel>
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 76) { model in
+        rbHomeFlowSectionStateView(state, minHeight: 76, skeleton: { RBHomeFlowBonusSummarySkeleton() }) { model in
             RBHomeFlowBonusSummarySectionView(model: model)
         }
         .frame(maxWidth: .infinity, maxHeight: 76)
@@ -91,7 +87,7 @@ extension RBHomeFlowPage {
     func detailActionListSection(
         state: RBHomeFlowSectionState<RBHomeFlowDetailActionsModel>
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 180) { model in
+        rbHomeFlowSectionStateView(state, minHeight: 180, skeleton: { RBHomeFlowDetailActionsSkeleton() }) { model in
             RBHomeFlowDetailActionListSectionView(model: model)
         }
     }
@@ -99,7 +95,7 @@ extension RBHomeFlowPage {
     func infoListSection(
         state: RBHomeFlowSectionState<RBHomeFlowInfoListModel>
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 136) { model in
+        rbHomeFlowSectionStateView(state, minHeight: 136, skeleton: { RBHomeFlowInfoListSkeleton() }) { model in
             RBHomeFlowInfoListSectionView(model: model)
         }
     }
@@ -109,7 +105,8 @@ extension RBHomeFlowPage {
         guard parts.count > 1 else {
             return .init(primary: rawValue)
         }
-        let secondary = String(parts.last ?? "")
+        let rawSecondary = String(parts.last ?? "")
+        let secondary = rawSecondary == "AZN" ? "₼" : rawSecondary
         let primary = parts.dropLast().joined(separator: " ")
         return .init(primary: primary, secondary: secondary)
     }

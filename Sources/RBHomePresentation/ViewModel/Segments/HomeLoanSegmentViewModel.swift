@@ -155,10 +155,10 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
 
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-pay", title: "Ödəniş et", systemImage: "creditcard.fill", onTap: {}),
-            .init(id: "qa-schedule", title: "Qrafik", systemImage: "calendar", onTap: {}),
-            .init(id: "qa-history", title: "Tarix", systemImage: "clock", onTap: {}),
-            .init(id: "qa-more", title: "Əlavə", systemImage: "plus.circle", onTap: {})
+            .init(id: "qa-pay", title: "Ödəniş et", icon: .system("creditcard.fill"), onTap: {}),
+            .init(id: "qa-schedule", title: "Qrafik", icon: .system("calendar"), onTap: {}),
+            .init(id: "qa-history", title: "Tarix", icon: .system("clock"), onTap: {}),
+            .init(id: "qa-more", title: "Əlavə", icon: .system("plus.circle"), onTap: {})
         ])
     }
 

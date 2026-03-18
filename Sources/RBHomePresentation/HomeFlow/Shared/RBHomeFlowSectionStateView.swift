@@ -9,14 +9,15 @@ import SwiftUI
 import RBDesignSystem
 
 @ViewBuilder
-func rbHomeFlowSectionStateView<Value, Content: View>(
+func rbHomeFlowSectionStateView<Value, Content: View, Skeleton: View>(
     _ state: RBHomeFlowSectionState<Value>,
     minHeight: CGFloat,
+    @ViewBuilder skeleton: () -> Skeleton,
     @ViewBuilder content: (Value) -> Content
 ) -> some View {
     switch state {
     case .loading:
-        RBLoadingView(size: 56, isFullscreen: false)
+        skeleton()
             .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .center)
     case .loaded(let value):
         content(value)
@@ -27,7 +28,5 @@ func rbHomeFlowSectionStateView<Value, Content: View>(
     case .error(let title, let message):
         RBEmptyState(title: title, message: message, layout: .inline)
             .frame(maxWidth: .infinity, minHeight: minHeight, alignment: .top)
-    case .hidden:
-        EmptyView()
     }
 }

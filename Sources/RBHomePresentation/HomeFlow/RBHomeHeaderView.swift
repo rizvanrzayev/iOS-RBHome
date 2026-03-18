@@ -69,9 +69,7 @@ struct RBHomeHeaderView: View {
                         .stroke(Color.rb.separator, lineWidth: 1)
                 }
                 .overlay {
-                    Image(systemName: action.systemImage)
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Color.rb.textPrimary)
+                    action.icon.view(size: .small, color: Color.rb.textPrimary)
                 }
         }
         .buttonStyle(.plain)

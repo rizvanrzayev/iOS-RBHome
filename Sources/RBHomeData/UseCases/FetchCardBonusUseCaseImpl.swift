@@ -8,6 +8,7 @@ package final class FetchCardBonusUseCaseImpl: FetchCardBonusUseCase {
     }
 
     package func execute(cardIdn: Int) async throws -> HomeCardBonusPoint {
-        try await repository.fetchBonusPoints(cardIdn: cardIdn)
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        return try await repository.fetchBonusPoints(cardIdn: cardIdn)
     }
 }

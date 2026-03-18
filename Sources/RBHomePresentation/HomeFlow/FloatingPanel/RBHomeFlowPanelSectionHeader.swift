@@ -93,46 +93,20 @@ struct RBHomeFlowPanelSectionHeader: View {
     // MARK: - Search bar
 
     private var searchInput: some View {
-        HStack(spacing: 8) {
-            Image(systemName: "magnifyingglass")
-                .resizable()
-                .frame(width: 16, height: 16)
-                .foregroundStyle(Color(hex: "#A1A7BC"))
-
-            TextField("Axtar...", text: $searchText)
-                .font(.rb.body14())
-                .foregroundStyle(Color.rb.textPrimary)
-                .onChange(of: searchText) { value in
-                    model.onSearchChange?(value)
-                }
-        }
-        .padding(.horizontal, 12)
-        .padding(.vertical, 8)
-        .background(
-            RoundedRectangle(cornerRadius: 12)
-                .fill(Color(hex: "#F6F6F9"))
-        )
+        RBSearchField(placeholder: "Axtar...", text: $searchText)
+            .onChange(of: searchText) { value in
+                model.onSearchChange?(value)
+            }
     }
 
     private var closeSearchButton: some View {
-        Button {
+        RBSearchFieldClearButton {
             withAnimation {
                 isSearchActive = false
                 searchText = ""
             }
             model.onSearchChange?("")
-        } label: {
-            ZStack {
-                Circle()
-                    .fill(Color(hex: "#A1A7BC"))
-                    .frame(width: 24, height: 24)
-                Image(systemName: "xmark")
-                    .resizable()
-                    .frame(width: 10, height: 10)
-                    .foregroundStyle(Color.white)
-            }
         }
-        .buttonStyle(.plain)
     }
 
     // MARK: - Filter sheet

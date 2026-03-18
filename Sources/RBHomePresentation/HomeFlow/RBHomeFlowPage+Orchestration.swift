@@ -34,7 +34,10 @@ extension RBHomeFlowPage {
                 )
                 .ignoresSafeArea(edges: .bottom)
             }
+            .simultaneousGesture(swipeBackGesture)
             .coordinateSpace(name: "homeFlowRoot")
+            .onAppear { swipeContainerWidth = proxy.size.width }
+            .onChange(of: proxy.size.width) { swipeContainerWidth = $0 }
             .onPreferenceChange(RBHomeFlowContentBottomKey.self) { bottomY in
                 guard let bottomY else { return }
                 let newHeight = max(
@@ -111,10 +114,6 @@ extension RBHomeFlowPage {
             .animation(RBHomeFlowPage.transitionAnimation, value: visualMode)
             .allowsHitTesting(visualMode == .detail)
         }
-        // Rasterise both bodies into a single Metal texture.
-        // Core Animation handles the opacity crossfade without SwiftUI
-        // re-evaluating quick actions, bonus, and panel on every frame.
-        .drawingGroup()
     }
 
     @ViewBuilder

@@ -68,7 +68,7 @@ extension RBHomeFlowPage {
     var headerContent: some View {
         switch visualMode {
         case .home:
-            rbHomeFlowSectionStateView(data.profileHeaderState, minHeight: 40) { model in
+            rbHomeFlowSectionStateView(data.profileHeaderState, minHeight: 40, skeleton: { RBHomeFlowHeaderSkeleton() }) { model in
                 RBHomeHeaderView(model: model)
             }
 

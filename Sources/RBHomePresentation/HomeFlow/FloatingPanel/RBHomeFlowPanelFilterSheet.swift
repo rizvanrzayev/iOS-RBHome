@@ -37,7 +37,7 @@ struct RBHomeFlowPanelFilterSheet: View {
         VStack(spacing: 8) {
             RBActionRow(model: RBActionRowModel(
                 id: "today",
-                systemImage: "sun.max",
+                icon: .iconActivity,
                 title: "Bu gün",
                 description: "",
                 onTap: { onSelect(.today) }
@@ -45,7 +45,7 @@ struct RBHomeFlowPanelFilterSheet: View {
 
             RBActionRow(model: RBActionRowModel(
                 id: "thisWeek",
-                systemImage: "calendar.week",
+                icon: .iconMoneyTime,
                 title: "Bu həftə",
                 description: "",
                 onTap: { onSelect(.thisWeek) }
@@ -53,7 +53,7 @@ struct RBHomeFlowPanelFilterSheet: View {
 
             RBActionRow(model: RBActionRowModel(
                 id: "thisMonth",
-                systemImage: "calendar",
+                icon: .iconDiscount,
                 title: "Bu ay",
                 description: "",
                 onTap: { onSelect(.thisMonth) }
@@ -61,7 +61,7 @@ struct RBHomeFlowPanelFilterSheet: View {
 
             RBActionRow(model: RBActionRowModel(
                 id: "custom",
-                systemImage: "calendar.badge.clock",
+                icon: .iconFilter,
                 title: "Seçilmiş tarix",
                 description: "",
                 onTap: { withAnimation { showingCustomPicker = true } }

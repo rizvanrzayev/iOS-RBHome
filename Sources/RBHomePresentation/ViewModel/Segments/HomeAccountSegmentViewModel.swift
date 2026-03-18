@@ -9,6 +9,9 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
 
     private var accounts: [HomeAccount] = []
     private var selectedAccountNumber: String?
+    private var rawRecords: [HomeAccountRecord] = []
+    private var panelSearchText: String = ""
+    private var panelDateFilter: RBHomeFlowPanelFilter? = nil
 
     private let fetchAccountsUseCase: FetchAccountsUseCase
     private let fetchRecordsUseCase: FetchAccountRecordsUseCase
@@ -62,13 +65,30 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
             operationsState = records.isEmpty
                 ? .empty(title: "Əməliyyat yoxdur", message: nil)
                 : .loaded(makeOperationsList(from: records))
-            panelState = records.isEmpty
-                ? .empty(title: "Əməliyyat yoxdur", message: nil)
-                : .loaded(makePanel(from: records))
+            rawRecords = records
+            panelSearchText = ""
+            panelDateFilter = nil
+            rebuildPanel()
         } catch {
             operationsState = .error(title: "Xəta", message: error.localizedDescription)
             panelState = .error(title: "Xəta", message: error.localizedDescription)
         }
+    }
+
+    private func rebuildPanel() {
+        panelState = .loaded(makePanel(from: filteredRecords()))
+    }
+
+    private func filteredRecords() -> [HomeAccountRecord] {
+        var list = rawRecords
+        if !panelSearchText.isEmpty {
+            list = list.filter { $0.title.localizedCaseInsensitiveContains(panelSearchText) }
+        }
+        if let filter = panelDateFilter {
+            let range = filter.dateRange
+            list = list.filter { $0.operDate >= range.from && $0.operDate <= range.to }
+        }
+        return list
     }
 
     // MARK: - Computed UI Models
@@ -137,6 +157,14 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
                     amount: "\(sign)\(HomeAmountFormatter.format(record.amount, currency: record.currency))",
                     isCredit: record.isCredit
                 )
+            },
+            onSearchChange: { [weak self] text in
+                self?.panelSearchText = text
+                self?.rebuildPanel()
+            },
+            onFilterChange: { [weak self] filter in
+                self?.panelDateFilter = filter
+                self?.rebuildPanel()
             }
         )
     }
@@ -153,10 +181,10 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
 
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-transfer", title: "Köçürmə", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "qa-topup", title: "Doldur", systemImage: "plus.circle.fill", onTap: {}),
-            .init(id: "qa-convert", title: "Çevir", systemImage: "arrow.2.circlepath", onTap: {}),
-            .init(id: "qa-statement", title: "Çıxarış", systemImage: "doc.text", onTap: {})
+            .init(id: "qa-transfer", title: "Köçürmə", icon: .system("arrow.left.arrow.right"), onTap: {}),
+            .init(id: "qa-topup", title: "Doldur", icon: .system("plus.circle.fill"), onTap: {}),
+            .init(id: "qa-convert", title: "Çevir", icon: .system("arrow.2.circlepath"), onTap: {}),
+            .init(id: "qa-statement", title: "Çıxarış", icon: .system("doc.text"), onTap: {})
         ])
     }
 

@@ -108,10 +108,10 @@ package final class HomeDepositSegmentViewModel: ObservableObject {
 
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-renew", title: "Yenilə", systemImage: "arrow.clockwise.circle.fill", onTap: {}),
-            .init(id: "qa-history", title: "Tarix", systemImage: "clock", onTap: {}),
-            .init(id: "qa-calc", title: "Hesabla", systemImage: "percent", onTap: {}),
-            .init(id: "qa-new", title: "Yeni", systemImage: "plus.circle", onTap: {})
+            .init(id: "qa-renew", title: "Yenilə", icon: .system("arrow.clockwise.circle.fill"), onTap: {}),
+            .init(id: "qa-history", title: "Tarix", icon: .system("clock"), onTap: {}),
+            .init(id: "qa-calc", title: "Hesabla", icon: .system("percent"), onTap: {}),
+            .init(id: "qa-new", title: "Yeni", icon: .system("plus.circle"), onTap: {})
         ])
     }
 

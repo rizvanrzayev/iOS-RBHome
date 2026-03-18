@@ -6,7 +6,6 @@
 //
 
 import SwiftUI
-import UIKit
 import RBDesignSystem
 
 extension RBHomeFlowPage {
@@ -74,20 +73,33 @@ extension RBHomeFlowPage {
             panelCollapseToken = UUID()
         }
 
-        let reduceMotion = UIAccessibility.isReduceMotionEnabled
-        let animation: Animation? = reduceMotion ? nil : RBHomeFlowPage.transitionAnimation
-
-        withAnimation(animation) {
+        withAnimation(RBHomeFlowPage.transitionAnimation) {
             visualMode = targetMode
             detailRevealProgress = targetMode == .detail ? 1 : 0
         }
 
-        guard !reduceMotion else { return }
         let hapticDelay = RBHomeFlowPage.transitionAnimationDuration * 0.85
         Task { @MainActor in
             try? await Task.sleep(nanoseconds: UInt64(hapticDelay * 1_000_000_000))
             RBHaptic.trigger(.medium)
         }
+    }
+
+    private var swipeEdgeThreshold: CGFloat { 60 }
+
+    var swipeBackGesture: some Gesture {
+        DragGesture(minimumDistance: 10)
+            .onEnded { value in
+                guard visualMode == .detail else { return }
+                let isHorizontal = abs(value.translation.width) > abs(value.translation.height)
+                let committed = isHorizontal
+                    && value.translation.width > 0
+                    && value.startLocation.x <= swipeEdgeThreshold
+                    && (value.translation.width > 80 || value.predictedEndTranslation.width > 200)
+                if committed {
+                    handleBackTap()
+                }
+            }
     }
 
     private func firstId<Item>(from state: RBHomeFlowSectionState<Item>) -> String? where Item: RBHomeFlowCarouselCollection {

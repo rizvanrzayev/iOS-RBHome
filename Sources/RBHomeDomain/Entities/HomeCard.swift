@@ -24,11 +24,16 @@ public struct HomeCard: Sendable {
     public let iban: String?
     public let cardType: HomeCardType
     public let cardNetwork: HomeCardNetwork
-    public let isPremium: Bool
-    /// Raw card product string from API (e.g. "GamerCard", "KartmaneJunior").
-    public let cardProduct: String?
     public let isLocked: Bool
     public let hasCashbackRule: Bool
+    /// Accrued interest amount shown on debit cards.
+    public let interestAmount: Double?
+    /// Minimum payment due shown on credit cards.
+    public let minimumPayment: Double?
+    /// Monthly installment payment amount.
+    public let monthlyDebt: Double?
+    /// True when the card is an installment card.
+    public let installmentCard: Bool
 
     public init(
         cardIdn: Int,
@@ -40,10 +45,12 @@ public struct HomeCard: Sendable {
         iban: String?,
         cardType: HomeCardType,
         cardNetwork: HomeCardNetwork = .none,
-        isPremium: Bool = false,
-        cardProduct: String? = nil,
         isLocked: Bool,
-        hasCashbackRule: Bool
+        hasCashbackRule: Bool,
+        interestAmount: Double? = nil,
+        minimumPayment: Double? = nil,
+        monthlyDebt: Double? = nil,
+        installmentCard: Bool = false
     ) {
         self.cardIdn = cardIdn
         self.token = token
@@ -54,9 +61,11 @@ public struct HomeCard: Sendable {
         self.iban = iban
         self.cardType = cardType
         self.cardNetwork = cardNetwork
-        self.isPremium = isPremium
-        self.cardProduct = cardProduct
         self.isLocked = isLocked
         self.hasCashbackRule = hasCashbackRule
+        self.interestAmount = interestAmount
+        self.minimumPayment = minimumPayment
+        self.monthlyDebt = monthlyDebt
+        self.installmentCard = installmentCard
     }
 }

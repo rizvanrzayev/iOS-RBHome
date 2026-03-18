@@ -23,7 +23,7 @@ struct RBHomeFlowDetailActionListSectionView: View {
                 ForEach(model.items) { item in
                     RBActionRow(model: .init(
                         id: item.id,
-                        systemImage: item.systemImage,
+                        icon: item.icon,
                         title: item.title,
                         description: item.description,
                         onTap: item.onTap

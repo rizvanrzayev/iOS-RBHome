@@ -8,6 +8,7 @@ package final class FetchDepositsUseCaseImpl: FetchDepositsUseCase {
     }
 
     package func execute() async throws -> [HomeDeposit] {
-        try await repository.fetchDeposits()
+        try await Task.sleep(nanoseconds: 2_000_000_000)
+        return try await repository.fetchDeposits()
     }
 }

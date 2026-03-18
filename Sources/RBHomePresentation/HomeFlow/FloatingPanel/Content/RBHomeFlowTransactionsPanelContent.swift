@@ -16,7 +16,7 @@ struct RBHomeFlowTransactionsPanelContent: View {
     var body: some View {
         switch state {
         case .loading:
-            RBLoadingView(size: 56, isFullscreen: false)
+            RBHomeFlowTransactionsSkeleton()
                 .frame(maxWidth: .infinity, maxHeight: .infinity)
         case .loaded(let model):
             loadedScrollView(model: model)
@@ -28,13 +28,18 @@ struct RBHomeFlowTransactionsPanelContent: View {
             RBEmptyState(title: title, message: message, layout: .inline)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 16)
-        case .hidden:
-            EmptyView()
         }
     }
 
     private func loadedScrollView(model: RBHomeFlowPanelModel) -> some View {
-        ScrollView {
+        guard !model.items.isEmpty else {
+            return AnyView(
+                RBEmptyState(title: "Əməliyyat yoxdur", message: nil, layout: .inline)
+                    .frame(maxWidth: .infinity)
+                    .padding(.top, 16)
+            )
+        }
+        return AnyView(ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 // Pull-down overscroll detection: minY > 0 = content pulled below natural position
                 GeometryReader { geo in
@@ -73,6 +78,7 @@ struct RBHomeFlowTransactionsPanelContent: View {
                 }
             }
         }
+        .scrollIndicators(.hidden)
         .coordinateSpace(name: "panelScroll")
         .onPreferenceChange(PanelScrollOffsetKey.self) { offset in
             if isExpanded && offset > RBHomeFlowLayout.floatingPanelCollapseThreshold {
@@ -80,5 +86,6 @@ struct RBHomeFlowTransactionsPanelContent: View {
             }
         }
         .modifier(RBScrollDisabledModifier(disabled: !isExpanded))
+        )
     }
 }

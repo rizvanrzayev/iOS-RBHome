@@ -12,7 +12,7 @@ extension RBHomeFlowPage {
     @ViewBuilder
     func loanDetailBody(_ model: RBHomeFlowLoanDetailModel) -> some View {
         if visualMode == .detail {
-            rbHomeFlowSectionStateView(model.scheduleState, minHeight: 136) { m in
+            rbHomeFlowSectionStateView(model.scheduleState, minHeight: 136, skeleton: { RBHomeFlowInfoListSkeleton() }) { m in
                 RBHomeFlowInfoListSectionView(model: .init(items: m.items))
             }
         }

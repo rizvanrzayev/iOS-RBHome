@@ -332,10 +332,10 @@ private extension RBHomeFlowSegmentPayload {
             .init(id: "card-3", title: "Dollar kartı", subtitle: "**** 1107", amount: "320,15 $")
         ])
         let homeActions = RBHomeFlowQuickActionsModel(items: [
-            .init(id: "a1", title: "Köçürmə", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "a2", title: "Ödəniş", systemImage: "creditcard", onTap: {}),
-            .init(id: "a3", title: "Tarix", systemImage: "clock", onTap: {}),
-            .init(id: "a4", title: "Digər", systemImage: "ellipsis.circle", onTap: {})
+            .init(id: "a1", title: "Köçürmə", icon: .custom(.actionTransfer), onTap: {}),
+            .init(id: "a2", title: "Ödəniş", icon: .custom(.actionPayment), onTap: {}),
+            .init(id: "a3", title: "Tarix", icon: .system("clock"), onTap: {}),
+            .init(id: "a4", title: "Digər", icon: .system("ellipsis.circle"), onTap: {})
         ])
         let bonus = RBHomeFlowBonusSummaryModel(items: [
             .init(id: "b1", systemImage: "star.fill", title: "Bonus balans", value: "1 240 xal"),
@@ -352,10 +352,10 @@ private extension RBHomeFlowSegmentPayload {
         ])
 
         let detailActions = RBHomeFlowQuickActionsModel(items: [
-            .init(id: "da1", title: "Köçürmə", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "da2", title: "Ödəniş", systemImage: "creditcard", onTap: {}),
-            .init(id: "da3", title: "Bloklama", systemImage: "lock.fill", onTap: {}),
-            .init(id: "da4", title: "Limit", systemImage: "slider.horizontal.3", onTap: {})
+            .init(id: "da1", title: "Köçürmə", icon: .custom(.actionTransfer), onTap: {}),
+            .init(id: "da2", title: "Ödəniş", icon: .custom(.actionPayment), onTap: {}),
+            .init(id: "da3", title: "Bloklama", icon: .system("lock.fill"), onTap: {}),
+            .init(id: "da4", title: "Limit", icon: .system("slider.horizontal.3"), onTap: {})
         ])
         let detailActionItems = RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: [
             .init(id: "s1", title: "Kartı blokla", description: "Müvəqqəti istifadəni dayandır", systemImage: "lock.fill", onTap: {}),
@@ -391,10 +391,10 @@ private extension RBHomeFlowSegmentPayload {
             .init(id: "acc-3", title: "Əmanət hesabı", subtitle: "AZ21 RABB 0000 0000 5544 3322", amount: "10 000,00 ₼")
         ])
         let homeActions = RBHomeFlowQuickActionsModel(items: [
-            .init(id: "a1", title: "Köçürmə", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "a2", title: "Doldur", systemImage: "plus.circle.fill", onTap: {}),
-            .init(id: "a3", title: "Çevir", systemImage: "arrow.2.circlepath", onTap: {}),
-            .init(id: "a4", title: "Çıxarış", systemImage: "doc.text", onTap: {})
+            .init(id: "a1", title: "Köçürmə", icon: .system("arrow.left.arrow.right"), onTap: {}),
+            .init(id: "a2", title: "Doldur", icon: .system("plus.circle.fill"), onTap: {}),
+            .init(id: "a3", title: "Çevir", icon: .system("arrow.2.circlepath"), onTap: {}),
+            .init(id: "a4", title: "Çıxarış", icon: .system("doc.text"), onTap: {})
         ])
         let operations = RBHomeFlowInfoListModel(title: "Son əməliyyatlar", items: [
             .init(id: "o1", title: "Köçürmə", subtitle: "Nicat Əliyev", value: "-200,00 ₼"),
@@ -451,10 +451,10 @@ private extension RBHomeFlowSegmentPayload {
             .init(id: "cr-2", title: "Avtomobil krediti", subtitle: "Qalıq borc", amount: "18 500,00 ₼")
         ])
         let homeActions = RBHomeFlowQuickActionsModel(items: [
-            .init(id: "a1", title: "Ödəniş et", systemImage: "creditcard.fill", onTap: {}),
-            .init(id: "a2", title: "Qrafik", systemImage: "calendar", onTap: {}),
-            .init(id: "a3", title: "Tarix", systemImage: "clock", onTap: {}),
-            .init(id: "a4", title: "Əlavə", systemImage: "plus.circle", onTap: {})
+            .init(id: "a1", title: "Ödəniş et", icon: .custom(.actionPayment), onTap: {}),
+            .init(id: "a2", title: "Qrafik", icon: .system("calendar"), onTap: {}),
+            .init(id: "a3", title: "Tarix", icon: .system("clock"), onTap: {}),
+            .init(id: "a4", title: "Əlavə", icon: .system("plus.circle"), onTap: {})
         ])
         let schedule = RBHomeFlowInfoListModel(title: "Ödəniş qrafiki", items: [
             .init(id: "s1", title: "Növbəti ödəniş", subtitle: "01 aprel 2026", value: "320,00 ₼"),
@@ -513,10 +513,10 @@ private extension RBHomeFlowSegmentPayload {
             .init(id: "dep-2", title: "\"Optimal\" əmanət", subtitle: "USD • 6 ay", amount: "2 000,00 $")
         ])
         let homeActions = RBHomeFlowQuickActionsModel(items: [
-            .init(id: "a1", title: "Yenilə", systemImage: "arrow.clockwise.circle.fill", onTap: {}),
-            .init(id: "a2", title: "Tarix", systemImage: "clock", onTap: {}),
-            .init(id: "a3", title: "Hesabla", systemImage: "percent", onTap: {}),
-            .init(id: "a4", title: "Yeni", systemImage: "plus.circle", onTap: {})
+            .init(id: "a1", title: "Yenilə", icon: .system("arrow.clockwise.circle.fill"), onTap: {}),
+            .init(id: "a2", title: "Tarix", icon: .system("clock"), onTap: {}),
+            .init(id: "a3", title: "Hesabla", icon: .system("percent"), onTap: {}),
+            .init(id: "a4", title: "Yeni", icon: .system("plus.circle"), onTap: {})
         ])
         let conditions = RBHomeFlowInfoListModel(title: "Şərtlər", items: [
             .init(id: "c1", title: "Faiz dərəcəsi", value: "10% illik"),
