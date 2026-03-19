@@ -1,10 +1,12 @@
 import Foundation
+import SwiftUI
+import RBDesignSystem
 import RBHomeDomain
 
 @MainActor
 package final class HomeCardSegmentViewModel: ObservableObject {
     @Published var cardsState: RBHomeFlowSectionState<RBHomeFlowCarouselModel> = .loading
-    @Published var bonusSummaryState: RBHomeFlowSectionState<RBHomeFlowBonusSummaryModel> = .loading
+    @Published var bonusSectionState: RBHomeFlowSectionState<RBHomeFlowCardBonusSection> = .loading
     @Published var panelState: RBHomeFlowSectionState<RBHomeFlowPanelModel> = .loading
 
     private var cards: [HomeCard] = []
@@ -30,7 +32,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     func load() async {
         cardsState = .loading
-        bonusSummaryState = .loading
+        bonusSectionState = .loading
         panelState = .loading
 
         do {
@@ -39,7 +41,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
             if fetched.isEmpty {
                 cardsState = .empty(title: "Kart yoxdur", message: nil)
-                bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+                bonusSectionState = .loaded(.edvOnly(edvPlaceholderModel))
                 panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             } else {
                 cardsState = .loaded(makeCarousel(from: fetched))
@@ -47,13 +49,13 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                     selectedCardIdn = first.cardIdn
                     await loadCardDetails(cardIdn: first.cardIdn)
                 } else {
-                    bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+                    bonusSectionState = .loaded(.edvOnly(edvPlaceholderModel))
                     panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
                 }
             }
         } catch {
             cardsState = .error(title: "Xəta", message: error.localizedDescription)
-            bonusSummaryState = .error(title: "Xəta", message: nil)
+            bonusSectionState = .error(title: "Xəta", message: nil)
             panelState = .error(title: "Xəta", message: nil)
         }
     }
@@ -64,13 +66,13 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
         if selected.cardType == .stored {
             selectedCardIdn = 0
-            bonusSummaryState = .empty(title: "Bonus məlumatı yoxdur", message: nil)
+            bonusSectionState = .loaded(.edvOnly(edvPlaceholderModel))
             panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             return
         }
 
         selectedCardIdn = selected.cardIdn
-        bonusSummaryState = .loading
+        bonusSectionState = .loading
         panelState = .loading
         await loadCardDetails(cardIdn: selected.cardIdn)
     }
@@ -82,14 +84,14 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         do {
             let (bonus, transactions) = try await (bonusResult, transResult)
             bonusPerCard[cardIdn] = bonus
-            bonusSummaryState = .loaded(makeBonusSummary(from: bonus))
+            bonusSectionState = .loaded(makeBonusSection(from: bonus))
             rawTransactions = transactions
             panelSearchText = ""
             panelDateFilter = nil
             rebuildCarousel()
             rebuildPanel()
         } catch {
-            bonusSummaryState = .error(title: "Xəta", message: error.localizedDescription)
+            bonusSectionState = .error(title: "Xəta", message: error.localizedDescription)
             panelState = .error(title: "Xəta", message: error.localizedDescription)
         }
     }
@@ -122,7 +124,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         return RBHomeFlowCardHomeModel(
             cardsState: cardsState,
             quickActionsState: qaState,
-            bonusSummaryState: bonusSummaryState,
+            bonusSectionState: bonusSectionState,
             panelState: panelState
         )
     }
@@ -156,7 +158,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 subtitle: card.maskedPan,
                 amount: amount,
                 networkAsset: card.cardNetwork.assetName,
-                bottomLeadingLabel: bottomLeadingLabel
+                bottomLeadingLabel: bottomLeadingLabel,
+                isStored: card.cardType == .stored
             )
         })
     }
@@ -176,13 +179,48 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         return nil
     }
 
-    private func makeBonusSummary(from bonus: HomeCardBonusPoint) -> RBHomeFlowBonusSummaryModel {
-        RBHomeFlowBonusSummaryModel(items: [
-            .init(id: "bonus-total", systemImage: "star.fill",
-                  title: "Bonus balans", value: "\(Int(bonus.totalPoint)) xal"),
-            .init(id: "bonus-current", systemImage: "percent",
-                  title: "Cashback", value: HomeAmountFormatter.format(bonus.currentPoint, currency: "AZN"))
-        ])
+    private func makeBonusSection(from bonus: HomeCardBonusPoint) -> RBHomeFlowCardBonusSection {
+        let edvContent: RBStatCardContent = bonus.currentPoint > 0
+            ? .data(
+                amount: HomeAmountFormatter.format(bonus.currentPoint, currency: "AZN"),
+                detail: "Gözlənilən: \(HomeAmountFormatter.format(0, currency: "AZN"))"
+              )
+            : .placeholder(subtitle: "Hesabınızı aktivləşdirin və ya qeydiyyatdan keçin")
+
+        let edvModel = RBHomeFlowEDVRefundModel(
+            icon: .iconEdv,
+            title: "ƏDV geri al",
+            titleColor: Color.rb.edvBlue,
+            content: edvContent,
+            onTap: {}
+        )
+
+        guard bonus.totalPoint > 0 else {
+            return .edvOnly(edvModel)
+        }
+
+        let bonusModel = RBHomeFlowEDVRefundModel(
+            icon: .iconBonus,
+            title: "Bonuslarım",
+            titleColor: Color.rb.green,
+            content: .data(
+                amount: "\(Int(bonus.totalPoint)) xal",
+                detail: "Gözlənilən: 0 xal"
+            ),
+            onTap: {}
+        )
+
+        return .pair(RBHomeFlowRefundPairModel(leading: bonusModel, trailing: edvModel))
+    }
+
+    private var edvPlaceholderModel: RBHomeFlowEDVRefundModel {
+        RBHomeFlowEDVRefundModel(
+            icon: .iconEdv,
+            title: "ƏDV geri al",
+            titleColor: Color.rb.edvBlue,
+            content: .placeholder(subtitle: "Hesabınızı aktivləşdirin və ya qeydiyyatdan keçin"),
+            onTap: {}
+        )
     }
 
     private func makePanel(from transactions: [HomeCardTransaction]) -> RBHomeFlowPanelModel {
@@ -194,8 +232,11 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                     id: "tx-\(index)",
                     date: HomeAmountFormatter.formatDate(tx.localDate),
                     title: tx.title,
+                    subtitle: tx.subtitle,
                     amount: "\(sign)\(HomeAmountFormatter.format(tx.amount, currency: tx.currency))",
-                    isCredit: tx.isCredit
+                    isCredit: tx.isCredit,
+                    iconURL: tx.iconURL,
+                    iconColorHex: tx.iconColorHex
                 )
             },
             onSearchChange: { [weak self] text in
@@ -214,26 +255,26 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         if selectedCard?.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
+                .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
             ])
         }
         return RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-transfer", title: "Karta Köçürmə", icon: .custom(.actionTransfer), onTap: {}),
-            .init(id: "qa-deposit", title: "Mədaxil", icon: .custom(.actionTopup), onTap: {}),
-            .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
+            .init(id: "qa-transfer", title: "Karta Köçürmə", icon: .custom(.actionQuickTransfer), onTap: {}),
+            .init(id: "qa-deposit", title: "Mədaxil", icon: .custom(.actionQuickTopup), onTap: {}),
+            .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
         ])
     }
 
     private var detailQuickActions: RBHomeFlowQuickActionsModel {
         if selectedCard?.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
+                .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
             ])
         }
         return RBHomeFlowQuickActionsModel(items: [
-            .init(id: "dqa-transfer", title: "Karta Köçürmə", icon: .custom(.actionTransfer), onTap: {}),
-            .init(id: "dqa-deposit", title: "Mədaxil", icon: .custom(.actionTopup), onTap: {}),
-            .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionPayment), onTap: {})
+            .init(id: "dqa-transfer", title: "Karta Köçürmə", icon: .custom(.actionQuickTransfer), onTap: {}),
+            .init(id: "dqa-deposit", title: "Mədaxil", icon: .custom(.actionQuickTopup), onTap: {}),
+            .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
         ])
     }
 

@@ -6,6 +6,7 @@
 //
 
 import Foundation
+import SwiftUI
 import RBDesignSystem
 
 // MARK: - Segment Home Models
@@ -13,18 +14,18 @@ import RBDesignSystem
 public struct RBHomeFlowCardHomeModel {
     public let cardsState: RBHomeFlowSectionState<RBHomeFlowCarouselModel>
     public let quickActionsState: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>
-    public let bonusSummaryState: RBHomeFlowSectionState<RBHomeFlowBonusSummaryModel>
+    public let bonusSectionState: RBHomeFlowSectionState<RBHomeFlowCardBonusSection>
     public let panelState: RBHomeFlowSectionState<RBHomeFlowPanelModel>
 
     public init(
         cardsState: RBHomeFlowSectionState<RBHomeFlowCarouselModel>,
         quickActionsState: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>,
-        bonusSummaryState: RBHomeFlowSectionState<RBHomeFlowBonusSummaryModel>,
+        bonusSectionState: RBHomeFlowSectionState<RBHomeFlowCardBonusSection>,
         panelState: RBHomeFlowSectionState<RBHomeFlowPanelModel> = .loading
     ) {
         self.cardsState = cardsState
         self.quickActionsState = quickActionsState
-        self.bonusSummaryState = bonusSummaryState
+        self.bonusSectionState = bonusSectionState
         self.panelState = panelState
     }
 }
@@ -267,13 +268,13 @@ public struct RBHomeFlowPageData {
         cardsState: RBHomeFlowSectionState<RBHomeFlowCarouselModel>,
         homeQuickActionsState: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>,
         detailQuickActionsState: RBHomeFlowSectionState<RBHomeFlowQuickActionsModel>,
-        bonusSummaryState: RBHomeFlowSectionState<RBHomeFlowBonusSummaryModel>,
+        bonusSectionState: RBHomeFlowSectionState<RBHomeFlowCardBonusSection>,
         detailActionsState: RBHomeFlowSectionState<RBHomeFlowDetailActionsModel>
     ) {
         let cardHome = RBHomeFlowCardHomeModel(
             cardsState: cardsState,
             quickActionsState: homeQuickActionsState,
-            bonusSummaryState: bonusSummaryState
+            bonusSectionState: bonusSectionState
         )
         let cardDetail = RBHomeFlowCardDetailModel(
             title: detailTitle,
@@ -337,11 +338,24 @@ private extension RBHomeFlowSegmentPayload {
             .init(id: "a3", title: "Tarix", icon: .system("clock"), onTap: {}),
             .init(id: "a4", title: "Digər", icon: .system("ellipsis.circle"), onTap: {})
         ])
-        let bonus = RBHomeFlowBonusSummaryModel(items: [
-            .init(id: "b1", systemImage: "star.fill", title: "Bonus balans", value: "1 240 xal"),
-            .init(id: "b2", systemImage: "percent", title: "Cashback", value: "28,40 ₼"),
-            .init(id: "b3", systemImage: "gift.fill", title: "Hədiyyə", value: "2 təklif")
-        ])
+        let bonusSection = RBHomeFlowCardBonusSection.pair(
+            RBHomeFlowRefundPairModel(
+                leading: RBHomeFlowEDVRefundModel(
+                    icon: .iconBonus,
+                    title: "Bonuslarım",
+                    titleColor: .rb.green,
+                    content: .data(amount: "1 240 xal", detail: "Gözlənilən: 320 xal"),
+                    onTap: {}
+                ),
+                trailing: RBHomeFlowEDVRefundModel(
+                    icon: .iconEdv,
+                    title: "ƏDV geri al",
+                    titleColor: .rb.edvBlue,
+                    content: .data(amount: "28,40 ₼", detail: "Gözlənilən: 10,80 ₼"),
+                    onTap: {}
+                )
+            )
+        )
         let panel = RBHomeFlowPanelModel(title: "Son əməliyyatlar", items: [
             .init(id: "t1", date: "Bu gün", title: "Bolt", subtitle: "Taksi", amount: "-4,20 ₼", isCredit: false),
             .init(id: "t2", date: "Bu gün", title: "Bravo Supermarket", subtitle: "Alış-veriş", amount: "-18,75 ₼", isCredit: false),
@@ -368,7 +382,7 @@ private extension RBHomeFlowSegmentPayload {
             home: .card(.init(
                 cardsState: .loaded(carousel),
                 quickActionsState: .loaded(homeActions),
-                bonusSummaryState: .loaded(bonus),
+                bonusSectionState: .loaded(bonusSection),
                 panelState: .loaded(panel)
             )),
             detail: .card(.init(

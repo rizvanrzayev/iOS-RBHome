@@ -7,6 +7,7 @@
 
 import Foundation
 import RBDesignSystem
+import SwiftUI
 
 // MARK: - Profile Header
 
@@ -64,14 +65,17 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     public let networkAsset: String?
     /// Optional label shown at the bottom-leading corner of the card (e.g. "Bonus: 120 xal").
     public let bottomLeadingLabel: String?
+    /// True for stored/external-bank cards — renders recharge content instead of plastic.
+    public let isStored: Bool
 
-    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil, bottomLeadingLabel: String? = nil) {
+    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil, bottomLeadingLabel: String? = nil, isStored: Bool = false) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
         self.amount = amount
         self.networkAsset = networkAsset
         self.bottomLeadingLabel = bottomLeadingLabel
+        self.isStored = isStored
     }
 }
 
@@ -206,14 +210,18 @@ public struct RBHomeFlowPanelItem: Identifiable {
     public let subtitle: String?
     public let amount: String
     public let isCredit: Bool
+    public let iconURL: String?
+    public let iconColorHex: String?
 
-    public init(id: String, date: String?, title: String, subtitle: String? = nil, amount: String, isCredit: Bool) {
+    public init(id: String, date: String?, title: String, subtitle: String? = nil, amount: String, isCredit: Bool, iconURL: String? = nil, iconColorHex: String? = nil) {
         self.id = id
         self.date = date
         self.title = title
         self.subtitle = subtitle
         self.amount = amount
         self.isCredit = isCredit
+        self.iconURL = iconURL
+        self.iconColorHex = iconColorHex
     }
 }
 
@@ -265,6 +273,52 @@ public struct RBHomeFlowPanelModel {
         self.items = items
         self.onSearchChange = onSearchChange
         self.onFilterChange = onFilterChange
+    }
+}
+
+// MARK: - EDV Refund
+
+public struct RBHomeFlowEDVRefundModel {
+    public let icon: RBIcon
+    public let title: String
+    public let titleColor: Color
+    public let content: RBStatCardContent
+    public let onTap: () -> Void
+
+    public init(
+        icon: RBIcon,
+        title: String,
+        titleColor: Color = Color.rb.edvBlue,
+        content: RBStatCardContent,
+        onTap: @escaping () -> Void
+    ) {
+        self.icon = icon
+        self.title = title
+        self.titleColor = titleColor
+        self.content = content
+        self.onTap = onTap
+    }
+}
+
+// MARK: - Card Bonus Section
+
+/// Represents the two possible layouts for the bonus/EDV section in the Card segment.
+public enum RBHomeFlowCardBonusSection {
+    /// Bonus is visible: two compact stat cards side by side (Bonuslarım + ƏDV geri al).
+    case pair(RBHomeFlowRefundPairModel)
+    /// Bonus not visible: single full-width EDV card.
+    case edvOnly(RBHomeFlowEDVRefundModel)
+}
+
+// MARK: - EDV Refund Pair
+
+public struct RBHomeFlowRefundPairModel {
+    public let leading: RBHomeFlowEDVRefundModel
+    public let trailing: RBHomeFlowEDVRefundModel
+
+    public init(leading: RBHomeFlowEDVRefundModel, trailing: RBHomeFlowEDVRefundModel) {
+        self.leading = leading
+        self.trailing = trailing
     }
 }
 

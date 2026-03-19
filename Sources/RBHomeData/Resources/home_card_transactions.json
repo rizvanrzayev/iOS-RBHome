@@ -3,44 +3,80 @@
     {
       "LocalDate": "2026-03-16T10:30:00",
       "Description": "Bolt",
-      "Amount": 4.20,
+      "Amount": -4.20,
       "Currency": "AZN",
-      "TransCondition": "D"
+      "TransCondition": "D",
+      "MccInfo": {
+        "MccGroupIconName": "https://img.icons8.com/color/48/bolt-food.png",
+        "MccCategoryIconColor": "1A1A1A",
+        "MccGroupName": "Bolt",
+        "MccDescription": "Taksi xidməti"
+      }
     },
     {
       "LocalDate": "2026-03-16T09:15:00",
       "Description": "Bravo Supermarket",
-      "Amount": 18.75,
+      "Amount": -18.75,
       "Currency": "AZN",
-      "TransCondition": "D"
+      "TransCondition": "D",
+      "MccInfo": {
+        "MccGroupIconName": "https://img.icons8.com/color/48/grocery-store.png",
+        "MccCategoryIconColor": "E8003D",
+        "MccGroupName": "Bravo",
+        "MccDescription": "Supermarket"
+      }
     },
     {
       "LocalDate": "2026-03-15T18:00:00",
       "Description": "Əmək haqqı",
       "Amount": 1200.00,
       "Currency": "AZN",
-      "TransCondition": "C"
+      "TransCondition": "C",
+      "MccInfo": {
+        "MccGroupIconName": "https://img.icons8.com/color/48/money-bag.png",
+        "MccCategoryIconColor": "4CAF50",
+        "MccGroupName": "Əmək haqqı",
+        "MccDescription": "Mədaxil"
+      }
     },
     {
       "LocalDate": "2026-03-15T14:20:00",
       "Description": "Netflix",
-      "Amount": 9.99,
+      "Amount": -9.99,
       "Currency": "USD",
-      "TransCondition": "D"
+      "TransCondition": "D",
+      "MccInfo": {
+        "MccGroupIconName": "https://img.icons8.com/color/48/netflix.png",
+        "MccCategoryIconColor": "E50914",
+        "MccGroupName": "Netflix",
+        "MccDescription": "Streaming xidməti"
+      }
     },
     {
       "LocalDate": "2026-03-14T20:10:00",
       "Description": "Wolt",
-      "Amount": 12.50,
+      "Amount": -12.50,
       "Currency": "AZN",
-      "TransCondition": "D"
+      "TransCondition": "D",
+      "MccInfo": {
+        "MccGroupIconName": "https://img.icons8.com/color/48/restaurant.png",
+        "MccCategoryIconColor": "009DE0",
+        "MccGroupName": "Wolt",
+        "MccDescription": "Yemək çatdırılması"
+      }
     },
     {
       "LocalDate": "2026-03-14T16:45:00",
       "Description": "BP Fuel",
-      "Amount": 45.00,
+      "Amount": -45.00,
       "Currency": "AZN",
-      "TransCondition": "D"
+      "TransCondition": "D",
+      "MccInfo": {
+        "MccGroupIconName": "https://img.icons8.com/color/48/gas-station.png",
+        "MccCategoryIconColor": "006F00",
+        "MccGroupName": "BP",
+        "MccDescription": "Yanacaq doldurma"
+      }
     }
   ]
 }

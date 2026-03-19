@@ -68,7 +68,9 @@ struct RBHomeFlowTransactionsPanelContent: View {
                         title: item.title,
                         subtitle: item.subtitle,
                         amount: item.amount,
-                        isCredit: item.isCredit
+                        isCredit: item.isCredit,
+                        iconURL: item.iconURL,
+                        iconColorHex: item.iconColorHex
                     ))
 
                     if index < model.items.count - 1 {

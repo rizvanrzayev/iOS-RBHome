@@ -8,29 +8,31 @@ import RBDesignSystem
 
 struct RBHomeFlowBonusSummarySkeleton: View {
     var body: some View {
-        HStack(spacing: 0) {
-            bonusItem
-            Divider()
-                .frame(width: 1, height: 36)
-            bonusItem
+        HStack(spacing: 12) {
+            statCardSkeleton
+            statCardSkeleton
         }
-        .frame(maxWidth: .infinity)
     }
 
-    private var bonusItem: some View {
-        HStack(spacing: 10) {
-            Circle()
-                .fill(Color(hex: "#F0F1F5"))
-                .frame(width: 36, height: 36)
-                .rbShimmer()
-            VStack(alignment: .leading, spacing: 6) {
+    private var statCardSkeleton: some View {
+        VStack(alignment: .leading, spacing: 6) {
+            // Icon + title row
+            HStack(spacing: 8) {
                 RBShimmerBox(cornerRadius: 4)
-                    .frame(width: 60, height: 10)
+                    .frame(width: 16, height: 16)
                 RBShimmerBox(cornerRadius: 4)
-                    .frame(width: 80, height: 10)
+                    .frame(width: 72, height: 12)
             }
+            // Amount
+            RBShimmerBox(cornerRadius: 4)
+                .frame(width: 88, height: 18)
+            // Detail
+            RBShimmerBox(cornerRadius: 4)
+                .frame(width: 100, height: 10)
         }
-        .frame(maxWidth: .infinity)
-        .padding(.horizontal, 20)
+        .frame(maxWidth: .infinity, alignment: .leading)
+        .padding(16)
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
     }
 }

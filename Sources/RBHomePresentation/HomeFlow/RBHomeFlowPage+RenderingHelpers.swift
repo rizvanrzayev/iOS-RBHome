@@ -21,7 +21,7 @@ extension RBHomeFlowPage {
                 onSelect: handlePrimaryItemTap,
                 onFocusChange: handlePrimaryItemFocusChange,
                 layout: .homeFlowDefault,
-                shellStyle: { _ in .preset(segment.carouselShellPreset) },
+                shellStyle: { item in item.isStored ? .preset(.storedCard) : .preset(segment.carouselShellPreset) },
                 content: { item in carouselCardContent(item: item, segment: segment) },
                 detailContent: { item in
                     RBHomeFlowCarouselDetailPanel(
@@ -40,16 +40,25 @@ extension RBHomeFlowPage {
     private func carouselCardContent(item: RBHomeFlowCarouselItem, segment: RBHomeFlowSegment) -> some View {
         switch segment {
         case .card:
-            RBProductCardPlasticContent(
-                model: .init(
-                    amount: amountText(item.amount),
-                    title: item.title,
-                    maskedNumber: .init(item.subtitle),
-                    brandImageName: item.networkAsset,
-                    trailingIcons: .init(showsEye: false, showsFavorite: false),
-                    bottomLeadingLabel: item.bottomLeadingLabel
+            if item.isStored {
+                RBProductCardRechargeContent(
+                    model: .init(
+                        cardName: item.title,
+                        maskedNumber: .init(item.subtitle)
+                    )
                 )
-            )
+            } else {
+                RBProductCardPlasticContent(
+                    model: .init(
+                        amount: amountText(item.amount),
+                        title: item.title,
+                        maskedNumber: .init(item.subtitle),
+                        brandImageName: item.networkAsset,
+                        trailingIcons: .init(showsEye: false, showsFavorite: false),
+                        bottomLeadingLabel: item.bottomLeadingLabel
+                    )
+                )
+            }
         case .account, .credit, .deposit:
             RBProductCardDefaultContent(
                 model: .init(
@@ -70,17 +79,17 @@ extension RBHomeFlowPage {
         }
     }
 
-    func bonusSummarySection(
-        state: RBHomeFlowSectionState<RBHomeFlowBonusSummaryModel>
+    func bonusSectionView(
+        state: RBHomeFlowSectionState<RBHomeFlowCardBonusSection>
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 76, skeleton: { RBHomeFlowBonusSummarySkeleton() }) { model in
-            RBHomeFlowBonusSummarySectionView(model: model)
+        rbHomeFlowSectionStateView(state, minHeight: 86, skeleton: { RBHomeFlowBonusSummarySkeleton() }) { section in
+            switch section {
+            case .pair(let model):
+                RBHomeFlowRefundPairSectionView(model: model)
+            case .edvOnly(let model):
+                RBHomeFlowEDVRefundSectionView(model: model)
+            }
         }
-        .frame(maxWidth: .infinity, maxHeight: 76)
-        .background(
-            RoundedRectangle(cornerRadius: 20, style: .continuous)
-                .fill(Color.white)
-        )
         .padding(.horizontal, 12)
     }
 

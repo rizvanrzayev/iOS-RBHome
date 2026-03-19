@@ -51,40 +51,22 @@ struct RBHomeFlowPanelSectionHeader: View {
             Spacer()
 
             if model.onSearchChange != nil {
-                Button {
+                RBIconButton(icon: .iconSearch) {
                     withAnimation { isSearchActive = true }
                     expand()
-                } label: {
-                    Image(systemName: "magnifyingglass")
-                        .font(.system(size: 14, weight: .medium))
-                        .foregroundStyle(Color.rb.textPrimary)
-                        .frame(width: 24, height: 24)
                 }
-                .buttonStyle(.plain)
             }
 
             if model.onFilterChange != nil {
                 if activeFilter != nil {
-                    Button {
+                    RBIconButton(icon: .xmark) {
                         activeFilter = nil
                         model.onFilterChange?(nil)
-                    } label: {
-                        Image(systemName: "xmark")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(Color.rb.textPrimary)
-                            .frame(width: 24, height: 24)
                     }
-                    .buttonStyle(.plain)
                 } else {
-                    Button {
+                    RBIconButton(icon: .iconFilter) {
                         showFilterSheet()
-                    } label: {
-                        Image(systemName: "line.3.horizontal.decrease")
-                            .font(.system(size: 14, weight: .medium))
-                            .foregroundStyle(Color.rb.textPrimary)
-                            .frame(width: 24, height: 24)
                     }
-                    .buttonStyle(.plain)
                 }
             }
         }

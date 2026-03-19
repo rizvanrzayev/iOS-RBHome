@@ -13,7 +13,7 @@ extension RBHomeFlowPage {
     func cardHomeBody(_ model: RBHomeFlowCardHomeModel) -> some View {
         quickActionsSection(state: model.quickActionsState)
         if visualMode == .home {
-            bonusSummarySection(state: model.bonusSummaryState)
+            bonusSectionView(state: model.bonusSectionState)
         }
     }
 
