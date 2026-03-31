@@ -10,7 +10,7 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     package let loanSegmentVM: HomeLoanSegmentViewModel
     package let depositSegmentVM: HomeDepositSegmentViewModel
 
-    @Published public var onboardingModal: HomeOnboardingModal?
+    @Published public var pendingOnboardingModals: [HomeOnboardingModal] = []
 
     private let fetchProfileUseCase: FetchHomeProfileUseCase
     private var profileHeaderState: RBHomeFlowSectionState<RBHomeFlowProfileHeaderModel> = .loading
@@ -80,27 +80,26 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     }
 
     private func checkOnboardingModals() {
+        var modals: [HomeOnboardingModal] = []
         let defaults = UserDefaults.standard
         if defaults.bool(forKey: "userNeedIdentity") {
             let raw = defaults.string(forKey: "identificationLinkForForeignCitizen") ?? ""
             if let url = URL(string: raw) {
-                onboardingModal = .foreignCitizen(verifyURL: url)
-                return
+                modals.append(.foreignCitizen(verifyURL: url))
             }
         }
         if defaults.bool(forKey: "rbUser"),
            !defaults.bool(forKey: "with_contract"),
            defaults.integer(forKey: "internet_banking_popup") < 3 {
-            onboardingModal = .internetBankingContract
-            return
+            modals.append(.internetBankingContract)
         }
         if defaults.bool(forKey: "SetSecretWord") {
-            onboardingModal = .secretWord
+            modals.append(.secretWord)
         }
+        pendingOnboardingModals = modals
     }
 
     public func dismissIBContractModal(signNow: Bool) {
-        onboardingModal = nil
         if signNow {
             onSignIBContract()
         } else {
@@ -110,12 +109,10 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     }
 
     public func dismissSecretWordModal(setNow: Bool) {
-        onboardingModal = nil
         if setNow { onSetSecretWord() }
     }
 
     public func dismissForeignCitizenModal(verify: Bool, verifyURL: URL) {
-        onboardingModal = nil
         if verify { onForeignCitizenVerify(verifyURL) } else { onLogout() }
     }
 

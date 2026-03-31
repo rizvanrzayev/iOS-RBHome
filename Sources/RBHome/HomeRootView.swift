@@ -31,9 +31,10 @@ private struct HomeContentView: View {
 
     var body: some View {
         contentView
-            .onChange(of: viewModel.onboardingModal) { modal in
-                guard let modal else { return }
-                presentOnboardingModal(modal, overlayManager: overlayManager, viewModel: viewModel)
+            .onChange(of: viewModel.pendingOnboardingModals) { modals in
+                for modal in modals {
+                    presentOnboardingModal(modal, overlayManager: overlayManager, viewModel: viewModel)
+                }
             }
     }
 
