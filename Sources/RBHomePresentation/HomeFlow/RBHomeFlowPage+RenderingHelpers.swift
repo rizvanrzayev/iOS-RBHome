@@ -26,7 +26,15 @@ extension RBHomeFlowPage {
                     onSelect: handlePrimaryItemTap,
                     onFocusChange: handlePrimaryItemFocusChange,
                     layout: .homeFlowDefault,
-                    shellStyle: { item in item.isStored ? .preset(.storedCard) : .preset(segment.carouselShellPreset) },
+                    shellStyle: { item in
+                        if item.isStored {
+                            return .preset(.storedCard)
+                        }
+                        if segment == .credit {
+                            return .plasticCard(assetName: "rb.card.bg.plastic.premium")
+                        }
+                        return .preset(segment.carouselShellPreset)
+                    },
                     content: { item in carouselCardContent(item: item, segment: segment) },
                     detailContent: { item in
                         RBHomeFlowCarouselDetailPanel(
@@ -67,7 +75,17 @@ extension RBHomeFlowPage {
                     onTapFavorite: { onFavoriteTap?(item.id) }
                 )
             }
-        case .account, .credit, .deposit:
+        case .credit:
+            RBProductCardDefaultContent(
+                model: .init(
+                    amount: amountText(item.amount),
+                    title: item.title,
+                    subtitle: item.subtitle,
+                    trailingIcons: .init(showsEye: true, isEyeOpen: isBalanceVisible, showsFavorite: false)
+                ),
+                onTapEye: { isBalanceVisible.toggle() }
+            )
+        case .account, .deposit:
             RBProductCardDefaultContent(
                 model: .init(
                     amount: amountText(item.amount),

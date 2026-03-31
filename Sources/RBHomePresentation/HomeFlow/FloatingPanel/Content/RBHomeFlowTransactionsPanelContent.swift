@@ -36,13 +36,7 @@ struct RBHomeFlowTransactionsPanelContent: View {
         return AnyView(ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if let segmentedControl = model.segmentedControl {
-                    RBSegmentedControl(
-                        selection: Binding(
-                            get: { segmentedControl.selectedIndex },
-                            set: { segmentedControl.onSelectionChange($0) }
-                        ),
-                        items: segmentedControl.items
-                    )
+                    panelSegmentedControl(segmentedControl)
                     .padding(.horizontal, 24)
                     .padding(.top, 8)
                     .padding(.bottom, model.items.isEmpty ? 0 : 8)
@@ -101,6 +95,72 @@ struct RBHomeFlowTransactionsPanelContent: View {
             }
         }
         .modifier(RBScrollDisabledModifier(disabled: !isExpanded))
+        )
+    }
+
+    @ViewBuilder
+    private func panelSegmentedControl(_ model: RBHomeFlowSegmentedControlModel) -> some View {
+        switch model.style {
+        case .default:
+            RBSegmentedControl(
+                selection: Binding(
+                    get: { model.selectedIndex },
+                    set: { model.onSelectionChange($0) }
+                ),
+                items: model.items
+            )
+        case .accent:
+            RBHomeFlowAccentSegmentedControl(
+                selection: Binding(
+                    get: { model.selectedIndex },
+                    set: { model.onSelectionChange($0) }
+                ),
+                items: model.items
+            )
+        }
+    }
+}
+
+private struct RBHomeFlowAccentSegmentedControl: View {
+    @Binding var selection: Int
+    let items: [String]
+
+    var body: some View {
+        ZStack(alignment: .leading) {
+            GeometryReader { geometry in
+                let segmentWidth = geometry.size.width / CGFloat(max(items.count, 1))
+
+                Capsule()
+                    .fill(Color.rb.selectionGreen)
+                    .frame(width: max(segmentWidth - 4, 0), height: 32)
+                    .offset(x: CGFloat(selection) * segmentWidth + 2, y: 2)
+                    .animation(.spring(response: 0.3, dampingFraction: 0.75), value: selection)
+            }
+
+            HStack(spacing: 0) {
+                ForEach(Array(items.enumerated()), id: \.offset) { index, title in
+                    Button {
+                        selection = index
+                        RBHaptic.trigger(.light)
+                    } label: {
+                        Text(title)
+                            .font(.rb.subtitle())
+                            .fontWeight(selection == index ? .semibold : .regular)
+                            .foregroundStyle(selection == index ? Color.white : Color.rb.textSecondary)
+                            .frame(maxWidth: .infinity)
+                            .frame(height: 32)
+                            .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                }
+            }
+        }
+        .frame(height: 36)
+        .background(Color.rb.backgroundSecondary)
+        .clipShape(Capsule())
+        .overlay(
+            Capsule()
+                .stroke(Color.rb.separator, lineWidth: 1)
         )
     }
 }

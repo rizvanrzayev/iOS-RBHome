@@ -1,4 +1,5 @@
 import Foundation
+import RBDesignSystem
 import RBHomeDomain
 
 @MainActor
@@ -26,13 +27,22 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
 
     private let fetchLoansUseCase: FetchLoansUseCase
     private let fetchScheduleUseCase: FetchLoanScheduleUseCase
+    private let onLoanPaymentTap: (String) -> Void
+    private let onLoanOrderTap: () -> Void
+    private let onLoanRequestTap: () -> Void
 
     package init(
         fetchLoansUseCase: FetchLoansUseCase,
-        fetchScheduleUseCase: FetchLoanScheduleUseCase
+        fetchScheduleUseCase: FetchLoanScheduleUseCase,
+        onLoanPaymentTap: @escaping (String) -> Void = { _ in },
+        onLoanOrderTap: @escaping () -> Void = {},
+        onLoanRequestTap: @escaping () -> Void = {}
     ) {
         self.fetchLoansUseCase = fetchLoansUseCase
         self.fetchScheduleUseCase = fetchScheduleUseCase
+        self.onLoanPaymentTap = onLoanPaymentTap
+        self.onLoanOrderTap = onLoanOrderTap
+        self.onLoanRequestTap = onLoanRequestTap
     }
 
     func load() async {
@@ -136,6 +146,10 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         loans.first { $0.contractNumber == selectedContractNumber } ?? loans.first
     }
 
+    private var selectedContract: String {
+        selectedLoan?.contractNumber ?? ""
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from loans: [HomeLoan]) -> RBHomeFlowCarouselModel {
@@ -172,6 +186,8 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         let dateFormatter = DateFormatter()
         dateFormatter.dateFormat = "d MMMM yyyy"
         dateFormatter.locale = Locale(identifier: "az_AZ")
+        let rowTitle = selectedFilter == .ongoing ? "Gözlənilən ödəniş" : "Ödənilmiş ödəniş"
+        let rowSubtitle = selectedLoan?.accountName
 
         return RBHomeFlowPanelModel(
             title: "Ödəniş tarixi",
@@ -181,7 +197,8 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
                 return RBHomeFlowPanelItem(
                     id: "pay-\(index)",
                     date: dateString,
-                    title: "Aylıq ödəniş",
+                    title: rowTitle,
+                    subtitle: rowSubtitle,
                     amount: "-\(HomeAmountFormatter.format(total, currency: "AZN"))",
                     isCredit: false
                 )
@@ -189,6 +206,7 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
             segmentedControl: .init(
                 selectedIndex: selectedFilter.rawValue,
                 items: [LoanRecordFilter.ongoing.title, LoanRecordFilter.paid.title],
+                style: .accent,
                 onSelectionChange: { [weak self] index in
                     self?.onFilterSelected(index: index)
                 }
@@ -200,10 +218,26 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
 
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-pay", title: "Ödəniş et", icon: .system("creditcard.fill"), onTap: {}),
-            .init(id: "qa-schedule", title: "Qrafik", icon: .system("calendar"), onTap: {}),
-            .init(id: "qa-history", title: "Tarix", icon: .system("clock"), onTap: {}),
-            .init(id: "qa-more", title: "Əlavə", icon: .system("plus.circle"), onTap: {})
+            .init(
+                id: "qa-pay-loan",
+                title: "Loan payment",
+                icon: .custom(.actionQuickPayment),
+                onTap: { [selectedContract, onLoanPaymentTap] in
+                    onLoanPaymentTap(selectedContract)
+                }
+            ),
+            .init(
+                id: "qa-order-now",
+                title: "Order new",
+                icon: .custom(.actionQuickTopup),
+                onTap: onLoanOrderTap
+            ),
+            .init(
+                id: "qa-request",
+                title: "Request",
+                icon: .iconPaperUpload,
+                onTap: onLoanRequestTap
+            )
         ])
     }
 

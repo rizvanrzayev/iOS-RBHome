@@ -10,13 +10,22 @@ public final class RBHomeDIContainer {
     public struct Dependencies {
         public let apiService: APIService
         public let onPaymentsTap: (String) -> Void
+        public let onLoanPaymentTap: (String) -> Void
+        public let onLoanOrderTap: () -> Void
+        public let onLoanRequestTap: () -> Void
 
         public init(
             apiService: APIService,
-            onPaymentsTap: @escaping (String) -> Void = { _ in }
+            onPaymentsTap: @escaping (String) -> Void = { _ in },
+            onLoanPaymentTap: @escaping (String) -> Void = { _ in },
+            onLoanOrderTap: @escaping () -> Void = {},
+            onLoanRequestTap: @escaping () -> Void = {}
         ) {
             self.apiService = apiService
             self.onPaymentsTap = onPaymentsTap
+            self.onLoanPaymentTap = onLoanPaymentTap
+            self.onLoanOrderTap = onLoanOrderTap
+            self.onLoanRequestTap = onLoanRequestTap
         }
     }
 
@@ -120,7 +129,10 @@ public final class RBHomeDIContainer {
     private func makeLoanSegmentVM() -> HomeLoanSegmentViewModel {
         HomeLoanSegmentViewModel(
             fetchLoansUseCase: makeFetchLoansUseCase(),
-            fetchScheduleUseCase: makeFetchLoanScheduleUseCase()
+            fetchScheduleUseCase: makeFetchLoanScheduleUseCase(),
+            onLoanPaymentTap: dependencies.onLoanPaymentTap,
+            onLoanOrderTap: dependencies.onLoanOrderTap,
+            onLoanRequestTap: dependencies.onLoanRequestTap
         )
     }
 

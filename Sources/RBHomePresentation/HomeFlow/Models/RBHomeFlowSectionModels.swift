@@ -126,17 +126,25 @@ public struct RBHomeFlowQuickActionsModel {
 public struct RBHomeFlowSegmentedControlModel {
     public let selectedIndex: Int
     public let items: [String]
+    public let style: RBHomeFlowSegmentedControlStyle
     public let onSelectionChange: (Int) -> Void
 
     public init(
         selectedIndex: Int,
         items: [String],
+        style: RBHomeFlowSegmentedControlStyle = .default,
         onSelectionChange: @escaping (Int) -> Void
     ) {
         self.selectedIndex = selectedIndex
         self.items = items
+        self.style = style
         self.onSelectionChange = onSelectionChange
     }
+}
+
+public enum RBHomeFlowSegmentedControlStyle {
+    case `default`
+    case accent
 }
 
 // MARK: - Bonus Summary
