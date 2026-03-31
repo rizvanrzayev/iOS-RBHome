@@ -25,6 +25,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let onCardToCardTap: (Int) -> Void
     private let onTopupTap: (Int) -> Void
     private let onBonusTap: (Int, String, String) -> Void
+    private let onEDVTap: () -> Void
     private let onPaymentsTap: (String) -> Void
     private let onCreditCardPaymentTap: (String) -> Void
     private let onInstallmentStatementTap: (Int) -> Void
@@ -42,6 +43,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onCardToCardTap: @escaping (Int) -> Void = { _ in },
         onTopupTap: @escaping (Int) -> Void = { _ in },
         onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
+        onEDVTap: @escaping () -> Void = {},
         onPaymentsTap: @escaping (String) -> Void = { _ in },
         onCreditCardPaymentTap: @escaping (String) -> Void = { _ in },
         onInstallmentStatementTap: @escaping (Int) -> Void = { _ in },
@@ -56,6 +58,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.onCardToCardTap = onCardToCardTap
         self.onTopupTap = onTopupTap
         self.onBonusTap = onBonusTap
+        self.onEDVTap = onEDVTap
         self.onPaymentsTap = onPaymentsTap
         self.onCreditCardPaymentTap = onCreditCardPaymentTap
         self.onInstallmentStatementTap = onInstallmentStatementTap
@@ -256,6 +259,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onBonusTap(card.cardIdn, card.name, card.currency)
     }
 
+    private func handleEDVTap() {
+        onEDVTap()
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from cards: [HomeCard]) -> RBHomeFlowCarouselModel {
@@ -308,7 +315,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
             title: "ƏDV geri al",
             titleColor: Color.rb.edvBlue,
             content: edvContent,
-            onTap: {}
+            onTap: { [weak self] in
+                self?.handleEDVTap()
+            }
         )
 
         guard bonus.totalPoint > 0 else {
@@ -337,7 +346,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
             title: "ƏDV geri al",
             titleColor: Color.rb.edvBlue,
             content: .placeholder(subtitle: "Hesabınızı aktivləşdirin və ya qeydiyyatdan keçin"),
-            onTap: {}
+            onTap: { [weak self] in
+                self?.handleEDVTap()
+            }
         )
     }
 

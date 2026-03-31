@@ -13,6 +13,7 @@ public final class RBHomeDIContainer {
         public let onCardToCardTap: (Int) -> Void
         public let onTopupTap: (Int) -> Void
         public let onBonusTap: (Int, String, String) -> Void
+        public let onEDVTap: () -> Void
         public let onPaymentsTap: (String) -> Void
         public let onTransferTap: () -> Void
         public let onCreditCardPaymentTap: (String) -> Void
@@ -33,6 +34,7 @@ public final class RBHomeDIContainer {
             onCardToCardTap: @escaping (Int) -> Void = { _ in },
             onTopupTap: @escaping (Int) -> Void = { _ in },
             onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
+            onEDVTap: @escaping () -> Void = {},
             onPaymentsTap: @escaping (String) -> Void = { _ in },
             onTransferTap: @escaping () -> Void = {},
             onCreditCardPaymentTap: @escaping (String) -> Void = { _ in },
@@ -52,6 +54,7 @@ public final class RBHomeDIContainer {
             self.onCardToCardTap = onCardToCardTap
             self.onTopupTap = onTopupTap
             self.onBonusTap = onBonusTap
+            self.onEDVTap = onEDVTap
             self.onPaymentsTap = onPaymentsTap
             self.onTransferTap = onTransferTap
             self.onCreditCardPaymentTap = onCreditCardPaymentTap
@@ -156,6 +159,7 @@ public final class RBHomeDIContainer {
             onCardToCardTap: dependencies.onCardToCardTap,
             onTopupTap: dependencies.onTopupTap,
             onBonusTap: dependencies.onBonusTap,
+            onEDVTap: dependencies.onEDVTap,
             onPaymentsTap: dependencies.onPaymentsTap,
             onCreditCardPaymentTap: dependencies.onCreditCardPaymentTap,
             onInstallmentStatementTap: dependencies.onInstallmentStatementTap,
