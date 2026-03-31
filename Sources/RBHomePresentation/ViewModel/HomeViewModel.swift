@@ -10,9 +10,16 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
     package let loanSegmentVM: HomeLoanSegmentViewModel
     package let depositSegmentVM: HomeDepositSegmentViewModel
 
+    @Published public var onboardingModal: HomeOnboardingModal?
+
     private let fetchProfileUseCase: FetchHomeProfileUseCase
     private var profileHeaderState: RBHomeFlowSectionState<RBHomeFlowProfileHeaderModel> = .loading
     private var cancellables = Set<AnyCancellable>()
+
+    private let onSignIBContract: () -> Void
+    private let onSetSecretWord: () -> Void
+    private let onLogout: () -> Void
+    private let onForeignCitizenVerify: (URL) -> Void
 
     // package init — callers use RBHomeDIContainer.makeHomeViewModel() factory
     package init(
@@ -20,13 +27,21 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
         cardSegmentVM: HomeCardSegmentViewModel,
         accountSegmentVM: HomeAccountSegmentViewModel,
         loanSegmentVM: HomeLoanSegmentViewModel,
-        depositSegmentVM: HomeDepositSegmentViewModel
+        depositSegmentVM: HomeDepositSegmentViewModel,
+        onSignIBContract: @escaping () -> Void,
+        onSetSecretWord: @escaping () -> Void,
+        onLogout: @escaping () -> Void,
+        onForeignCitizenVerify: @escaping (URL) -> Void
     ) {
         self.fetchProfileUseCase = fetchProfileUseCase
         self.cardSegmentVM = cardSegmentVM
         self.accountSegmentVM = accountSegmentVM
         self.loanSegmentVM = loanSegmentVM
         self.depositSegmentVM = depositSegmentVM
+        self.onSignIBContract = onSignIBContract
+        self.onSetSecretWord = onSetSecretWord
+        self.onLogout = onLogout
+        self.onForeignCitizenVerify = onForeignCitizenVerify
     }
 
     package func onItemFocusChanged(id: String, segment: RBHomeFlowSegment) {
@@ -61,6 +76,47 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
             async let p: Void = loadProfile()
             _ = await (c, a, l, d, p)
         }
+        checkOnboardingModals()
+    }
+
+    private func checkOnboardingModals() {
+        let defaults = UserDefaults.standard
+        if defaults.bool(forKey: "userNeedIdentity") {
+            let raw = defaults.string(forKey: "identificationLinkForForeignCitizen") ?? ""
+            if let url = URL(string: raw) {
+                onboardingModal = .foreignCitizen(verifyURL: url)
+                return
+            }
+        }
+        if defaults.bool(forKey: "rbUser"),
+           !defaults.bool(forKey: "with_contract"),
+           defaults.integer(forKey: "internet_banking_popup") < 3 {
+            onboardingModal = .internetBankingContract
+            return
+        }
+        if defaults.bool(forKey: "SetSecretWord") {
+            onboardingModal = .secretWord
+        }
+    }
+
+    public func dismissIBContractModal(signNow: Bool) {
+        onboardingModal = nil
+        if signNow {
+            onSignIBContract()
+        } else {
+            let n = UserDefaults.standard.integer(forKey: "internet_banking_popup")
+            UserDefaults.standard.set(n + 1, forKey: "internet_banking_popup")
+        }
+    }
+
+    public func dismissSecretWordModal(setNow: Bool) {
+        onboardingModal = nil
+        if setNow { onSetSecretWord() }
+    }
+
+    public func dismissForeignCitizenModal(verify: Bool, verifyURL: URL) {
+        onboardingModal = nil
+        if verify { onForeignCitizenVerify(verifyURL) } else { onLogout() }
     }
 
     private func bindSegmentVMs() {

@@ -10,25 +10,43 @@ public final class RBHomeDIContainer {
     public struct Dependencies {
         public let apiService: APIService
         public let onPaymentsTap: (String) -> Void
+        public let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
+        public let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
         public let onLoanPaymentTap: (String) -> Void
         public let onMortgageLoanPaymentTap: (String, String) -> Void
         public let onLoanOrderTap: () -> Void
         public let onLoanRequestTap: () -> Void
+        public let onSignIBContract: () -> Void
+        public let onSetSecretWord: () -> Void
+        public let onLogout: () -> Void
+        public let onForeignCitizenVerify: (URL) -> Void
 
         public init(
             apiService: APIService,
             onPaymentsTap: @escaping (String) -> Void = { _ in },
+            onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
+            onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onLoanPaymentTap: @escaping (String) -> Void = { _ in },
             onMortgageLoanPaymentTap: @escaping (String, String) -> Void = { _, _ in },
             onLoanOrderTap: @escaping () -> Void = {},
-            onLoanRequestTap: @escaping () -> Void = {}
+            onLoanRequestTap: @escaping () -> Void = {},
+            onSignIBContract: @escaping () -> Void = {},
+            onSetSecretWord: @escaping () -> Void = {},
+            onLogout: @escaping () -> Void = {},
+            onForeignCitizenVerify: @escaping (URL) -> Void = { _ in }
         ) {
             self.apiService = apiService
             self.onPaymentsTap = onPaymentsTap
+            self.onSplitBillTap = onSplitBillTap
+            self.onChargebackTap = onChargebackTap
             self.onLoanPaymentTap = onLoanPaymentTap
             self.onMortgageLoanPaymentTap = onMortgageLoanPaymentTap
             self.onLoanOrderTap = onLoanOrderTap
             self.onLoanRequestTap = onLoanRequestTap
+            self.onSignIBContract = onSignIBContract
+            self.onSetSecretWord = onSetSecretWord
+            self.onLogout = onLogout
+            self.onForeignCitizenVerify = onForeignCitizenVerify
         }
     }
 
@@ -116,7 +134,9 @@ public final class RBHomeDIContainer {
             fetchBonusUseCase: makeFetchCardBonusUseCase(),
             fetchEDVBalanceUseCase: makeFetchEDVBalanceUseCase(),
             setFavoriteCardUseCase: makeSetFavoriteCardUseCase(),
-            onPaymentsTap: dependencies.onPaymentsTap
+            onPaymentsTap: dependencies.onPaymentsTap,
+            onSplitBillTap: dependencies.onSplitBillTap,
+            onChargebackTap: dependencies.onChargebackTap
         )
     }
 
@@ -154,7 +174,11 @@ public final class RBHomeDIContainer {
             cardSegmentVM: makeCardSegmentVM(),
             accountSegmentVM: makeAccountSegmentVM(),
             loanSegmentVM: makeLoanSegmentVM(),
-            depositSegmentVM: makeDepositSegmentVM()
+            depositSegmentVM: makeDepositSegmentVM(),
+            onSignIBContract: dependencies.onSignIBContract,
+            onSetSecretWord: dependencies.onSetSecretWord,
+            onLogout: dependencies.onLogout,
+            onForeignCitizenVerify: dependencies.onForeignCitizenVerify
         )
     }
 }

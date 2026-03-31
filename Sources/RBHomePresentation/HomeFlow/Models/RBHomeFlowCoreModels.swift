@@ -44,3 +44,11 @@ public enum RBHomeFlowSectionState<Value> {
 }
 
 extension RBHomeFlowSectionState: Equatable where Value: Equatable {}
+
+// MARK: - Onboarding Modals
+
+public enum HomeOnboardingModal: Equatable {
+    case internetBankingContract
+    case secretWord
+    case foreignCitizen(verifyURL: URL)
+}
