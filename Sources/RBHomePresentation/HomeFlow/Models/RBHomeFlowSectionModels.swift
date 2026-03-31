@@ -67,8 +67,9 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     public let bottomLeadingLabel: String?
     /// True for stored/external-bank cards — renders recharge content instead of plastic.
     public let isStored: Bool
+    public let isFavorite: Bool
 
-    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil, bottomLeadingLabel: String? = nil, isStored: Bool = false) {
+    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil, bottomLeadingLabel: String? = nil, isStored: Bool = false, isFavorite: Bool = false) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
@@ -76,6 +77,7 @@ public struct RBHomeFlowCarouselItem: Identifiable {
         self.networkAsset = networkAsset
         self.bottomLeadingLabel = bottomLeadingLabel
         self.isStored = isStored
+        self.isFavorite = isFavorite
     }
 }
 

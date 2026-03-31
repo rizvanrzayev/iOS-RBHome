@@ -19,6 +19,7 @@ public struct RBHomeFlowPage: View {
     let onBack: () -> Void
     let onItemFocusChange: ((String, RBHomeFlowSegment) -> Void)?
     let onRetry: (() -> Void)?
+    let onFavoriteTap: ((String) -> Void)?
 
     @State var previousActiveSegmentForCache: RBHomeFlowSegment?
     @State var activeSegment: RBHomeFlowSegment
@@ -38,7 +39,8 @@ public struct RBHomeFlowPage: View {
         onModeChange: @escaping (RBHomeFlowMode) -> Void,
         onBack: @escaping () -> Void,
         onItemFocusChange: ((String, RBHomeFlowSegment) -> Void)? = nil,
-        onRetry: (() -> Void)? = nil
+        onRetry: (() -> Void)? = nil,
+        onFavoriteTap: ((String) -> Void)? = nil
     ) {
         self.data = data
         self.mode = mode
@@ -47,6 +49,7 @@ public struct RBHomeFlowPage: View {
         self.onBack = onBack
         self.onItemFocusChange = onItemFocusChange
         self.onRetry = onRetry
+        self.onFavoriteTap = onFavoriteTap
         self._activeSegment = State(initialValue: initialSegment)
         self._selectedProductIdCache = State(initialValue: [:])
         self._visualMode = State(initialValue: mode)

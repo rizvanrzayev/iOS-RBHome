@@ -36,7 +36,10 @@ public struct HomeRootView: View {
                 onItemFocusChange: { id, segment in
                     viewModel.onItemFocusChanged(id: id, segment: segment)
                 },
-                onRetry: { viewModel.reloadSegments() }
+                onRetry: { viewModel.reloadSegments() },
+                onFavoriteTap: { id in
+                    viewModel.cardSegmentVM.toggleFavorite(cardId: id)
+                }
             )
         case .loading:
             RBLoadingView()

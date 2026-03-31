@@ -25,6 +25,7 @@ public struct HomeCard: Sendable {
     public let cardType: HomeCardType
     public let cardNetwork: HomeCardNetwork
     public let isLocked: Bool
+    public let isFavorite: Bool
     public let hasCashbackRule: Bool
     /// Accrued interest amount shown on debit cards.
     public let interestAmount: Double?
@@ -46,6 +47,7 @@ public struct HomeCard: Sendable {
         cardType: HomeCardType,
         cardNetwork: HomeCardNetwork = .none,
         isLocked: Bool,
+        isFavorite: Bool = false,
         hasCashbackRule: Bool,
         interestAmount: Double? = nil,
         minimumPayment: Double? = nil,
@@ -62,6 +64,7 @@ public struct HomeCard: Sendable {
         self.cardType = cardType
         self.cardNetwork = cardNetwork
         self.isLocked = isLocked
+        self.isFavorite = isFavorite
         self.hasCashbackRule = hasCashbackRule
         self.interestAmount = interestAmount
         self.minimumPayment = minimumPayment

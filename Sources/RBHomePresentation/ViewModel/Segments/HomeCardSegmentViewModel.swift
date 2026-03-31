@@ -20,6 +20,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let fetchTransactionsUseCase: FetchCardTransactionsUseCase
     private let fetchBonusUseCase: FetchCardBonusUseCase
     private let fetchEDVBalanceUseCase: FetchEDVBalanceUseCase
+    private let setFavoriteCardUseCase: SetFavoriteCardUseCase
 
     private var edvBalance: HomeEDVBalance?
 
@@ -27,12 +28,14 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         fetchCardsUseCase: FetchCardsUseCase,
         fetchTransactionsUseCase: FetchCardTransactionsUseCase,
         fetchBonusUseCase: FetchCardBonusUseCase,
-        fetchEDVBalanceUseCase: FetchEDVBalanceUseCase
+        fetchEDVBalanceUseCase: FetchEDVBalanceUseCase,
+        setFavoriteCardUseCase: SetFavoriteCardUseCase
     ) {
         self.fetchCardsUseCase = fetchCardsUseCase
         self.fetchTransactionsUseCase = fetchTransactionsUseCase
         self.fetchBonusUseCase = fetchBonusUseCase
         self.fetchEDVBalanceUseCase = fetchEDVBalanceUseCase
+        self.setFavoriteCardUseCase = setFavoriteCardUseCase
     }
 
     func load() async {
@@ -167,7 +170,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 amount: amount,
                 networkAsset: card.cardNetwork.assetName,
                 bottomLeadingLabel: bottomLeadingLabel,
-                isStored: card.cardType == .stored
+                isStored: card.cardType == .stored,
+                isFavorite: card.isFavorite
             )
         })
     }
@@ -260,6 +264,17 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 self?.rebuildPanel()
             }
         )
+    }
+
+    // MARK: - Favorite
+
+    func toggleFavorite(cardId: String) {
+        guard let card = cards.first(where: { ($0.token ?? String($0.cardIdn)) == cardId }),
+              card.cardType != .stored else { return }
+        Task {
+            try? await setFavoriteCardUseCase.execute(cardIdn: card.cardIdn)
+            await load()
+        }
     }
 
     // MARK: - Static Actions

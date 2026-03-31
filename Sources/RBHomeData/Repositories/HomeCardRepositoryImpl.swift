@@ -70,6 +70,22 @@ package final class HomeCardRepositoryImpl: HomeCardRepository {
         }
     }
 
+    package func setFavoriteCard(cardIdn: Int) async throws {
+        try await withCheckedThrowingContinuation { continuation in
+            let endpoint = HomePlasticEndpoint.setFavoriteCard(cardIdn: cardIdn)
+                .makeHomeRequest(type: APIResponse<EmptyDTO>.self)
+            dataTransferService.request(with: endpoint, on: backgroundQueue) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success:
+                    continuation.resume()
+                case .failure(let error):
+                    continuation.resume(throwing: self.errorHandler.handle(error))
+                }
+            }
+        }
+    }
+
     package func fetchBonusPoints(cardIdn: Int) async throws -> HomeCardBonusPoint {
         try await withCheckedThrowingContinuation { continuation in
             let endpoint = HomePlasticEndpoint.getBonusPoints(cardIdn: cardIdn)

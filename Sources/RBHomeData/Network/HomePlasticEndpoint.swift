@@ -5,6 +5,7 @@ enum HomePlasticEndpoint: EndpointInterface {
     case listCards
     case listTransactions(cardIdn: Int)
     case getBonusPoints(cardIdn: Int)
+    case setFavoriteCard(cardIdn: Int)
 
     var basePath: String { "plastic/" }
 
@@ -13,10 +14,16 @@ enum HomePlasticEndpoint: EndpointInterface {
         case .listCards:         return "listPlasticCardAccount"
         case .listTransactions:  return "listDynamicStatement"
         case .getBonusPoints:    return "kartmaneCurrentPoint"
+        case .setFavoriteCard:   return "saveFavoriteCard"
         }
     }
 
-    var method: HTTPMethodType { .get }
+    var method: HTTPMethodType {
+        switch self {
+        case .setFavoriteCard: return .post
+        default:               return .get
+        }
+    }
 
     var queryParameters: [String: Any] {
         switch self {
@@ -26,6 +33,17 @@ enum HomePlasticEndpoint: EndpointInterface {
             return ["CardIdn": cardIdn]
         case .getBonusPoints(let cardIdn):
             return ["cardIdn": cardIdn]
+        case .setFavoriteCard:
+            return [:]
+        }
+    }
+
+    var bodyParameters: [String: Any] {
+        switch self {
+        case .setFavoriteCard(let cardIdn):
+            return ["Id": cardIdn]
+        default:
+            return [:]
         }
     }
 
@@ -34,6 +52,7 @@ enum HomePlasticEndpoint: EndpointInterface {
         case .listCards:        return "home_plastic_cards"
         case .listTransactions: return "home_card_transactions"
         case .getBonusPoints:   return "home_bonus_points"
+        case .setFavoriteCard:  return nil
         }
     }
 }

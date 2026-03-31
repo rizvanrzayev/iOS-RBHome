@@ -61,6 +61,10 @@ public final class RBHomeDIContainer {
         FetchEDVBalanceUseCaseImpl(repository: makeCardRepository())
     }
 
+    private func makeSetFavoriteCardUseCase() -> SetFavoriteCardUseCase {
+        SetFavoriteCardUseCaseImpl(repository: makeCardRepository())
+    }
+
     private func makeFetchAccountsUseCase() -> FetchAccountsUseCase {
         FetchAccountsUseCaseImpl(repository: makeAccountRepository())
     }
@@ -93,7 +97,8 @@ public final class RBHomeDIContainer {
             fetchCardsUseCase: makeFetchCardsUseCase(),
             fetchTransactionsUseCase: makeFetchCardTransactionsUseCase(),
             fetchBonusUseCase: makeFetchCardBonusUseCase(),
-            fetchEDVBalanceUseCase: makeFetchEDVBalanceUseCase()
+            fetchEDVBalanceUseCase: makeFetchEDVBalanceUseCase(),
+            setFavoriteCardUseCase: makeSetFavoriteCardUseCase()
         )
     }
 

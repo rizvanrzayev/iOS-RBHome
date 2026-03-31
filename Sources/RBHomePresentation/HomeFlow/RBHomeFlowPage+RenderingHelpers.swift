@@ -60,10 +60,11 @@ extension RBHomeFlowPage {
                         title: item.title,
                         maskedNumber: .init(item.subtitle),
                         brandImageName: item.networkAsset,
-                        trailingIcons: .init(showsEye: true, isEyeOpen: isBalanceVisible, showsFavorite: false),
+                        trailingIcons: .init(showsEye: true, isEyeOpen: isBalanceVisible, showsFavorite: true, isFavorite: item.isFavorite),
                         bottomLeadingLabel: isBalanceVisible ? item.bottomLeadingLabel : item.bottomLeadingLabel.map { _ in "••••" }
                     ),
-                    onTapEye: { isBalanceVisible.toggle() }
+                    onTapEye: { isBalanceVisible.toggle() },
+                    onTapFavorite: { onFavoriteTap?(item.id) }
                 )
             }
         case .account, .credit, .deposit:
