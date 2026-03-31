@@ -98,7 +98,7 @@ extension RBHomeFlowPage {
     @ViewBuilder
     func segmentContent(for segment: RBHomeFlowSegment) -> some View {
         let segmentPayload = payload(for: segment)
-        carouselSection(state: segmentPayload.home.cardsState, segment: segment)
+        carouselSection(state: segmentPayload.home.cardsState, segment: segment, onRetry: onRetry)
         ZStack(alignment: .top) {
             VStack(alignment: .leading, spacing: RBHomeFlowLayout.sectionVerticalSpacing) {
                 segmentHomeBody(segmentPayload.home)

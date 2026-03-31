@@ -35,7 +35,8 @@ public struct HomeRootView: View {
                 onBack: { mode = .home },
                 onItemFocusChange: { id, segment in
                     viewModel.onItemFocusChanged(id: id, segment: segment)
-                }
+                },
+                onRetry: { viewModel.reloadSegments() }
             )
         case .loading:
             RBLoadingView()

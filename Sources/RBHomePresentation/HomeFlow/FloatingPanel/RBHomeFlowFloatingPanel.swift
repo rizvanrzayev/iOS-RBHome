@@ -38,7 +38,7 @@ struct RBHomeFlowFloatingPanel: View {
                 case .transactions(let state):
                     VStack(spacing: 0) {
                         if case .loaded(let model) = state {
-                            RBHomeFlowPanelSectionHeader(model: model, expand: expand)
+                            RBHomeFlowPanelSectionHeader(model: model, expand: expand, collapse: collapse)
                         }
                         RBHomeFlowTransactionsPanelContent(
                             state: state, isExpanded: isExpanded, collapse: collapse)

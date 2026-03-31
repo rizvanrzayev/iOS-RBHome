@@ -15,8 +15,10 @@ struct RBHomeFlowDateFilterView: View {
     let filter: RBHomeFlowPanelFilter
     /// Called only to update the ViewModel (transaction filtering). Does NOT update parent's activeFilter.
     let onFilterChange: (RBHomeFlowPanelFilter) -> Void
-    /// Called when a date chip is tapped in custom-range mode.
+    /// Called when the "from" chip is tapped in custom-range mode (or the preset pill label).
     var onChipTap: (() -> Void)? = nil
+    /// Called when the "to" chip is tapped in custom-range mode. Falls back to onChipTap if nil.
+    var onToChipTap: (() -> Void)? = nil
 
     /// Navigation offset relative to the current preset period.
     @State private var offset: Int = 0
@@ -36,14 +38,10 @@ struct RBHomeFlowDateFilterView: View {
 
     private func customChips(from: Date, to: Date) -> some View {
         HStack(spacing: 8) {
-            dateChip(date: from)
-            dateChip(date: to)
+            RBDropdownChip(label: formatFullDate(from)) { onChipTap?() }
+            RBDropdownChip(label: formatFullDate(to)) { (onToChipTap ?? onChipTap)?() }
         }
         .frame(maxWidth: .infinity)
-    }
-
-    private func dateChip(date: Date) -> some View {
-        RBDropdownChip(label: formatFullDate(date)) { onChipTap?() }
     }
 
     // MARK: - Single navigable pill (preset)
@@ -52,7 +50,8 @@ struct RBHomeFlowDateFilterView: View {
         RBNavigablePill(
             label: presetLabel,
             onPrevious: { changeOffset(by: -1) },
-            onNext: { changeOffset(by: 1) }
+            onNext: { changeOffset(by: 1) },
+            onLabelTap: onChipTap
         )
         .onChange(of: filter) { _ in
             offset = 0

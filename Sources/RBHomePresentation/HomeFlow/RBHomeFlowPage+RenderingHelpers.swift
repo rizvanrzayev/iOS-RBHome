@@ -9,30 +9,36 @@ import SwiftUI
 import RBDesignSystem
 
 extension RBHomeFlowPage {
+    @ViewBuilder
     func carouselSection(
         state: RBHomeFlowSectionState<RBHomeFlowCarouselModel>,
-        segment: RBHomeFlowSegment
+        segment: RBHomeFlowSegment,
+        onRetry: (() -> Void)? = nil
     ) -> some View {
-        rbHomeFlowSectionStateView(state, minHeight: 162, skeleton: { RBHomeFlowCarouselSkeleton().padding(.horizontal, -RBHomeFlowLayout.pageHorizontalInset) }) { model in
-            RBHomeFlowProductCarouselSectionView(
-                items: model.items,
-                selectedId: selectedProductId,
-                detailRevealProgress: detailRevealProgress,
-                onSelect: handlePrimaryItemTap,
-                onFocusChange: handlePrimaryItemFocusChange,
-                layout: .homeFlowDefault,
-                shellStyle: { item in item.isStored ? .preset(.storedCard) : .preset(segment.carouselShellPreset) },
-                content: { item in carouselCardContent(item: item, segment: segment) },
-                detailContent: { item in
-                    RBHomeFlowCarouselDetailPanel(
-                        segmentLabel: segment.title,
-                        title: item.title,
-                        subtitle: item.subtitle,
-                        amount: item.amount
-                    )
-                }
-            )
-            .padding(.horizontal, -RBHomeFlowLayout.pageHorizontalInset)
+        if case .error(let title, let message) = state {
+            RBHomeFlowCarouselErrorCell(title: title, message: message, onRetry: onRetry)
+        } else {
+            rbHomeFlowSectionStateView(state, minHeight: 162, skeleton: { RBHomeFlowCarouselSkeleton().padding(.horizontal, -RBHomeFlowLayout.pageHorizontalInset) }) { model in
+                RBHomeFlowProductCarouselSectionView(
+                    items: model.items,
+                    selectedId: selectedProductId,
+                    detailRevealProgress: detailRevealProgress,
+                    onSelect: handlePrimaryItemTap,
+                    onFocusChange: handlePrimaryItemFocusChange,
+                    layout: .homeFlowDefault,
+                    shellStyle: { item in item.isStored ? .preset(.storedCard) : .preset(segment.carouselShellPreset) },
+                    content: { item in carouselCardContent(item: item, segment: segment) },
+                    detailContent: { item in
+                        RBHomeFlowCarouselDetailPanel(
+                            segmentLabel: segment.title,
+                            title: item.title,
+                            subtitle: item.subtitle,
+                            amount: item.amount
+                        )
+                    }
+                )
+                .padding(.horizontal, -RBHomeFlowLayout.pageHorizontalInset)
+            }
         }
     }
 

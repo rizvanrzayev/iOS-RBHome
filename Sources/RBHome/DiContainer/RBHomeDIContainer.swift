@@ -57,6 +57,10 @@ public final class RBHomeDIContainer {
         FetchCardBonusUseCaseImpl(repository: makeCardRepository())
     }
 
+    private func makeFetchEDVBalanceUseCase() -> FetchEDVBalanceUseCase {
+        FetchEDVBalanceUseCaseImpl(repository: makeCardRepository())
+    }
+
     private func makeFetchAccountsUseCase() -> FetchAccountsUseCase {
         FetchAccountsUseCaseImpl(repository: makeAccountRepository())
     }
@@ -88,7 +92,8 @@ public final class RBHomeDIContainer {
         HomeCardSegmentViewModel(
             fetchCardsUseCase: makeFetchCardsUseCase(),
             fetchTransactionsUseCase: makeFetchCardTransactionsUseCase(),
-            fetchBonusUseCase: makeFetchCardBonusUseCase()
+            fetchBonusUseCase: makeFetchCardBonusUseCase(),
+            fetchEDVBalanceUseCase: makeFetchEDVBalanceUseCase()
         )
     }
 

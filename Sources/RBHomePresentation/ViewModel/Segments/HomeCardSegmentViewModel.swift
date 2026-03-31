@@ -19,15 +19,20 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let fetchCardsUseCase: FetchCardsUseCase
     private let fetchTransactionsUseCase: FetchCardTransactionsUseCase
     private let fetchBonusUseCase: FetchCardBonusUseCase
+    private let fetchEDVBalanceUseCase: FetchEDVBalanceUseCase
+
+    private var edvBalance: HomeEDVBalance?
 
     package init(
         fetchCardsUseCase: FetchCardsUseCase,
         fetchTransactionsUseCase: FetchCardTransactionsUseCase,
-        fetchBonusUseCase: FetchCardBonusUseCase
+        fetchBonusUseCase: FetchCardBonusUseCase,
+        fetchEDVBalanceUseCase: FetchEDVBalanceUseCase
     ) {
         self.fetchCardsUseCase = fetchCardsUseCase
         self.fetchTransactionsUseCase = fetchTransactionsUseCase
         self.fetchBonusUseCase = fetchBonusUseCase
+        self.fetchEDVBalanceUseCase = fetchEDVBalanceUseCase
     }
 
     func load() async {
@@ -35,7 +40,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         bonusSectionState = .loading
         panelState = .loading
 
+        async let edvResult = fetchEDVBalanceUseCase.execute()
+
         do {
+            edvBalance = try? await edvResult
             let fetched = try await fetchCardsUseCase.execute()
             cards = fetched
 
@@ -180,12 +188,16 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     }
 
     private func makeBonusSection(from bonus: HomeCardBonusPoint) -> RBHomeFlowCardBonusSection {
-        let edvContent: RBStatCardContent = bonus.currentPoint > 0
-            ? .data(
-                amount: HomeAmountFormatter.format(bonus.currentPoint, currency: "AZN"),
-                detail: "Gözlənilən: \(HomeAmountFormatter.format(0, currency: "AZN"))"
-              )
-            : .placeholder(subtitle: "Hesabınızı aktivləşdirin və ya qeydiyyatdan keçin")
+        let edv = edvBalance
+        let edvContent: RBStatCardContent
+        if let edv, edv.balance > 0 || edv.pendingBalance > 0 {
+            edvContent = .data(
+                amount: HomeAmountFormatter.format(edv.balance, currency: "AZN"),
+                detail: "Gözlənilən: \(HomeAmountFormatter.format(edv.pendingBalance, currency: "AZN"))"
+            )
+        } else {
+            edvContent = .placeholder(subtitle: "Hesabınızı aktivləşdirin və ya qeydiyyatdan keçin")
+        }
 
         let edvModel = RBHomeFlowEDVRefundModel(
             icon: .iconEdv,
@@ -205,7 +217,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
             titleColor: Color.rb.green,
             content: .data(
                 amount: "\(Int(bonus.totalPoint)) xal",
-                detail: "Gözlənilən: 0 xal"
+                detail: "Gözlənilən: \(Int(bonus.currentPoint)) xal"
             ),
             onTap: {}
         )

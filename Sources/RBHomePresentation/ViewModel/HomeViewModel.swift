@@ -40,6 +40,16 @@ public final class HomeViewModel: RBBaseViewModel<RBHomeFlowPageData> {
         }
     }
 
+    public func reloadSegments() {
+        Task {
+            async let c: Void = cardSegmentVM.load()
+            async let a: Void = accountSegmentVM.load()
+            async let l: Void = loanSegmentVM.load()
+            async let d: Void = depositSegmentVM.load()
+            _ = await (c, a, l, d)
+        }
+    }
+
     public override func onAppear() {
         bindSegmentVMs()
         rebuildPageData()

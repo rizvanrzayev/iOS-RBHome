@@ -12,10 +12,16 @@ import RBDesignSystem
 struct RBHomeFlowPanelSectionHeader: View {
     let model: RBHomeFlowPanelModel
     let expand: () -> Void
+    let collapse: () -> Void
 
     @State private var isSearchActive = false
     @State private var searchText = ""
     @State private var activeFilter: RBHomeFlowPanelFilter? = nil
+    @State private var searchFocused = false
+
+    // Wheel picker state for direct chip editing (custom date range)
+    @State private var editingDateKind: EditingDateKind? = nil
+    @State private var pickerDate: Date = Date()
 
     @EnvironmentObject private var overlayManager: RBOverlayManager
 
@@ -33,9 +39,32 @@ struct RBHomeFlowPanelSectionHeader: View {
             .padding(.vertical, 12)
 
             if let filter = activeFilter, !isSearchActive {
-                filterChipRow(filter: filter)
-                    .padding(.horizontal, 24)
-                    .padding(.bottom, 8)
+                RBHomeFlowDateFilterView(
+                    filter: filter,
+                    onFilterChange: { newFilter in
+                        model.onFilterChange?(newFilter)
+                    },
+                    onChipTap: { openWheelPicker(kind: .from) },
+                    onToChipTap: { openWheelPicker(kind: .to) }
+                )
+                .padding(.horizontal, 24)
+                .padding(.bottom, 8)
+            }
+        }
+        .sheet(item: $editingDateKind) { kind in
+            if #available(iOS 16.0, *) {
+                RBWheelPickerSheet(
+                    title: kind == .from ? "Başlanğıc tarixi" : "Son tarix",
+                    selection: $pickerDate,
+                    onDone: { commitPickerEdit(kind: kind) }
+                )
+                .presentationDetents([.height(350)])
+            } else {
+                RBWheelPickerSheet(
+                    title: kind == .from ? "Başlanğıc tarixi" : "Son tarix",
+                    selection: $pickerDate,
+                    onDone: { commitPickerEdit(kind: kind) }
+                )
             }
         }
     }
@@ -52,7 +81,8 @@ struct RBHomeFlowPanelSectionHeader: View {
 
             if model.onSearchChange != nil {
                 RBIconButton(icon: .iconSearch) {
-                    withAnimation { isSearchActive = true }
+                    isSearchActive = true
+                    searchFocused = true
                     expand()
                 }
             }
@@ -62,6 +92,7 @@ struct RBHomeFlowPanelSectionHeader: View {
                     RBIconButton(icon: .xmark) {
                         activeFilter = nil
                         model.onFilterChange?(nil)
+                        collapse()
                     }
                 } else {
                     RBIconButton(icon: .iconFilter) {
@@ -75,7 +106,7 @@ struct RBHomeFlowPanelSectionHeader: View {
     // MARK: - Search bar
 
     private var searchInput: some View {
-        RBSearchField(placeholder: "Axtar...", text: $searchText)
+        RBSearchField(placeholder: "Axtar...", text: $searchText, isFocused: $searchFocused)
             .onChange(of: searchText) { value in
                 model.onSearchChange?(value)
             }
@@ -83,81 +114,93 @@ struct RBHomeFlowPanelSectionHeader: View {
 
     private var closeSearchButton: some View {
         RBSearchFieldClearButton {
-            withAnimation {
-                isSearchActive = false
-                searchText = ""
-            }
+            isSearchActive = false
+            searchFocused = false
+            searchText = ""
             model.onSearchChange?("")
+            collapse()
         }
     }
 
     // MARK: - Filter sheet
 
     private func showFilterSheet() {
-        overlayManager.showSheet(containerStyle: .none) {
-            RBHomeFlowPanelFilterSheet(onSelect: { filter in
+        overlayManager.showSheet(
+            containerStyle: .default(
+                title: "Razılaşdırma tarixi",
+                showsHandle: true,
+                showsClose: true,
+                contentPadding: 24
+            )
+        ) {
+            RBHomeFlowPanelFilterSheet(
+                onSelect: { filter in
+                    activeFilter = filter
+                    overlayManager.dismissCurrent()
+                    model.onFilterChange?(filter)
+                    expand()
+                },
+                onCustomDate: {
+                    overlayManager.dismissCurrent()
+                    showDatePicker()
+                }
+            )
+        }
+    }
+
+    // MARK: - Full date range picker (overlay, for preset pill label tap)
+
+    private func showDatePicker() {
+        let currentFrom: Date
+        let currentTo: Date
+        if case .custom(let f, let t) = activeFilter {
+            currentFrom = f
+            currentTo = t
+        } else {
+            currentFrom = Date()
+            currentTo = Date()
+        }
+        overlayManager.showSheet(
+            containerStyle: .default(
+                title: "Tarix seçin",
+                showsHandle: true,
+                showsClose: true,
+                contentPadding: 24
+            )
+        ) {
+            RBHomeFlowSingleDateSheet(from: currentFrom, to: currentTo) { filter in
                 activeFilter = filter
                 overlayManager.dismissCurrent()
                 model.onFilterChange?(filter)
-            })
-        }
-    }
-
-    // MARK: - Filter chip
-
-    private func filterChipRow(filter: RBHomeFlowPanelFilter) -> some View {
-        HStack {
-            HStack(spacing: 6) {
-                Image(systemName: "calendar")
-                    .font(.system(size: 12, weight: .medium))
-                    .foregroundStyle(Color.rb.textSecondary)
-
-                Text(filterDisplayText(filter))
-                    .font(.rb.body14())
-                    .foregroundStyle(Color.rb.textPrimary)
-
-                Button {
-                    activeFilter = nil
-                    model.onFilterChange?(nil)
-                } label: {
-                    Image(systemName: "xmark")
-                        .font(.system(size: 10, weight: .semibold))
-                        .foregroundStyle(Color.rb.textSecondary)
-                }
-                .buttonStyle(.plain)
             }
-            .padding(.horizontal, 12)
-            .padding(.vertical, 6)
-            .background(
-                RoundedRectangle(cornerRadius: 8)
-                    .fill(Color(hex: "#F6F6F9"))
-            )
-
-            Spacer()
         }
     }
 
-    // MARK: - Filter display text
+    // MARK: - Wheel picker (direct chip tap in custom range mode)
 
-    private func filterDisplayText(_ filter: RBHomeFlowPanelFilter) -> String {
-        let fmt = DateFormatter()
-        fmt.dateFormat = "dd.MM.yyyy"
-        let today = Date()
-        switch filter {
-        case .today:
-            return fmt.string(from: today)
-        case .thisWeek:
-            let start = Calendar.current.date(from:
-                Calendar.current.dateComponents([.yearForWeekOfYear, .weekOfYear], from: today))!
-            let end = Calendar.current.date(byAdding: .day, value: 6, to: start)!
-            return "\(fmt.string(from: start)) - \(fmt.string(from: end))"
-        case .thisMonth:
-            let comps = Calendar.current.dateComponents([.year, .month], from: today)
-            let start = Calendar.current.date(from: comps)!
-            let end = Calendar.current.date(byAdding: DateComponents(month: 1, day: -1), to: start)!
-            return "\(fmt.string(from: start)) - \(fmt.string(from: end))"
-        case .custom(let from, let to):
-            return "\(fmt.string(from: from)) - \(fmt.string(from: to))"
+    private func openWheelPicker(kind: EditingDateKind) {
+        if case .custom(let f, let t) = activeFilter {
+            pickerDate = kind == .from ? f : t
+        } else {
+            pickerDate = Date()
         }
+        editingDateKind = kind
     }
+
+    private func commitPickerEdit(kind: EditingDateKind) {
+        guard case .custom(let f, let t) = activeFilter else { return }
+        let newFilter: RBHomeFlowPanelFilter = kind == .from
+            ? .custom(from: pickerDate, to: t)
+            : .custom(from: f, to: pickerDate)
+        activeFilter = newFilter
+        model.onFilterChange?(newFilter)
+        editingDateKind = nil
+    }
+}
+
+// MARK: - Helpers
+
+private enum EditingDateKind: Identifiable {
+    case from, to
+    var id: String { self == .from ? "from" : "to" }
 }

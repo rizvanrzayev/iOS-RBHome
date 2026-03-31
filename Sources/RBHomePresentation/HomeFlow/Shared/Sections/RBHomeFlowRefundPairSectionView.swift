@@ -12,7 +12,7 @@ struct RBHomeFlowRefundPairSectionView: View {
     let model: RBHomeFlowRefundPairModel
 
     var body: some View {
-        HStack(spacing: 12) {
+        HStack(alignment: .top, spacing: 12) {
             RBStatCard(
                 icon: model.leading.icon,
                 title: model.leading.title,
@@ -21,6 +21,7 @@ struct RBHomeFlowRefundPairSectionView: View {
                 style: .compact,
                 onTap: model.leading.onTap
             )
+            .frame(maxHeight: .infinity)
             RBStatCard(
                 icon: model.trailing.icon,
                 title: model.trailing.title,
@@ -29,6 +30,8 @@ struct RBHomeFlowRefundPairSectionView: View {
                 style: .compact,
                 onTap: model.trailing.onTap
             )
+            .frame(maxHeight: .infinity)
         }
+        .fixedSize(horizontal: false, vertical: true)
     }
 }

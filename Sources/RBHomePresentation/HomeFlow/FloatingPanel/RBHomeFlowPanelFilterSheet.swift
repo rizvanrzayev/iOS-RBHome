@@ -1,9 +1,9 @@
 //
 //  RBHomeFlowPanelFilterSheet.swift
-//  RBDesignSystem
+//  RBHomePresentation
 //
-//  Filter bottom sheet for the HomeFlow transactions panel.
-//  Presents preset date filters and a custom date range picker.
+//  Plain preset-list content for the filter bottom sheet.
+//  Container (title, handle, close) is provided by the overlay manager's containerStyle.
 //
 
 import SwiftUI
@@ -11,74 +11,62 @@ import RBDesignSystem
 
 struct RBHomeFlowPanelFilterSheet: View {
     let onSelect: (RBHomeFlowPanelFilter) -> Void
-
-    @State private var showingCustomPicker = false
-    @State private var startDate = Date()
-    @State private var endDate = Date()
+    var onCustomDate: (() -> Void)? = nil
 
     var body: some View {
-        RBBottomSheetContentContainer(
-            title: showingCustomPicker ? "Seçilmiş tarix" : "Razılaşdırma tarixi",
-            showsHandle: true,
-            showsClose: false,
-            contentPadding: 16
-        ) {
-            if showingCustomPicker {
-                customPickerContent
-            } else {
-                presetListContent
+        VStack(spacing: 0) {
+            filterRow(title: "Bu Gün") { onSelect(.today) }
+            Divider().padding(.leading, 20)
+            filterRow(title: "Bu Həftə") { onSelect(.thisWeek) }
+            Divider().padding(.leading, 20)
+            filterRow(title: "Bu Ay") { onSelect(.thisMonth) }
+            Divider().padding(.leading, 20)
+            filterRow(title: "Seçilmiş tarix") { onCustomDate?() }
+        }
+        .background(Color.white)
+        .clipShape(RoundedRectangle(cornerRadius: 16))
+    }
+
+    private func filterRow(title: String, action: @escaping () -> Void) -> some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                    .font(.rb.body(weight: .regular))
+                    .foregroundStyle(Color.rb.textPrimary)
+                Spacer()
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 14, weight: .medium))
+                    .foregroundStyle(Color.rb.textSecondary)
             }
+            .padding(.vertical, 18)
+            .contentShape(Rectangle())
         }
+        .buttonStyle(.plain)
+    }
+}
+
+// MARK: - Date range picker sheet content
+
+struct RBHomeFlowSingleDateSheet: View {
+    let onSelect: (RBHomeFlowPanelFilter) -> Void
+
+    @State private var fromDate: Date
+    @State private var toDate: Date
+
+    init(from: Date = Date(), to: Date = Date(), onSelect: @escaping (RBHomeFlowPanelFilter) -> Void) {
+        self._fromDate = State(initialValue: from)
+        self._toDate = State(initialValue: to)
+        self.onSelect = onSelect
     }
 
-    // MARK: - Preset list
-
-    private var presetListContent: some View {
-        VStack(spacing: 8) {
-            RBActionRow(model: RBActionRowModel(
-                id: "today",
-                icon: .iconActivity,
-                title: "Bu gün",
-                description: "",
-                onTap: { onSelect(.today) }
-            ))
-
-            RBActionRow(model: RBActionRowModel(
-                id: "thisWeek",
-                icon: .iconMoneyTime,
-                title: "Bu həftə",
-                description: "",
-                onTap: { onSelect(.thisWeek) }
-            ))
-
-            RBActionRow(model: RBActionRowModel(
-                id: "thisMonth",
-                icon: .iconDiscount,
-                title: "Bu ay",
-                description: "",
-                onTap: { onSelect(.thisMonth) }
-            ))
-
-            RBActionRow(model: RBActionRowModel(
-                id: "custom",
-                icon: .iconFilter,
-                title: "Seçilmiş tarix",
-                description: "",
-                onTap: { withAnimation { showingCustomPicker = true } }
-            ))
-        }
-    }
-
-    // MARK: - Custom date picker
-
-    private var customPickerContent: some View {
+    var body: some View {
         VStack(spacing: 16) {
-            RBDatePicker("Başlanğıc tarixi", selection: $startDate)
-            RBDatePicker("Son tarix", selection: $endDate)
-
+            RBDatePicker("Başlanğıc tarixi", selection: $fromDate)
+            RBDatePicker("Son tarix", selection: $toDate)
             RBButton("Tətbiq et") {
-                onSelect(.custom(from: startDate, to: endDate))
+                onSelect(.custom(from: fromDate, to: toDate))
             }
         }
+        .padding(.bottom, 8)
     }
 }

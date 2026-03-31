@@ -88,7 +88,7 @@ extension RBHomeFlowPage {
     private var swipeEdgeThreshold: CGFloat { 60 }
 
     var swipeBackGesture: some Gesture {
-        DragGesture(minimumDistance: 10)
+        DragGesture(minimumDistance: 1)
             .onEnded { value in
                 guard visualMode == .detail else { return }
                 let isHorizontal = abs(value.translation.width) > abs(value.translation.height)

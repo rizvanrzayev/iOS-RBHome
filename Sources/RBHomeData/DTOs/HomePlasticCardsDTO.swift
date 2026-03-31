@@ -18,9 +18,25 @@ extension HomeCardNetwork {
 struct HomePlasticCardsResponseDTO: Decodable {
     let listMobileUserPlasticCard: [HomePlasticCardDTO]?
     let rechargeCards: [HomeStoredCardDTO]?
+    let vatCard: HomeVATCardDTO?
     enum CodingKeys: String, CodingKey {
         case listMobileUserPlasticCard = "ListMobileUserPlasticCard"
         case rechargeCards = "RechargeCards"
+        case vatCard = "VatCard"
+    }
+}
+
+struct HomeVATCardDTO: Decodable {
+    let balance: Double?
+    let pendingBalance: Double?
+
+    enum CodingKeys: String, CodingKey {
+        case balance = "Balance"
+        case pendingBalance = "PendingBalance"
+    }
+
+    func toEntity() -> HomeEDVBalance {
+        HomeEDVBalance(balance: balance ?? 0, pendingBalance: pendingBalance ?? 0)
     }
 }
 

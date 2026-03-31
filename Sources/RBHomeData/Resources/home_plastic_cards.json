@@ -4,7 +4,7 @@
       "CardIdn": 1001,
       "Name": "RabCard Visa",
       "Pan": "4521",
-      "Amount": 2845.60,
+      "Amount": 2845.6,
       "Currency": "AZN",
       "Iban": "AZ21RABB00000000123445210000",
       "CardType": "D",
@@ -16,7 +16,7 @@
       "CardIdn": 1002,
       "Name": "Əmək haqqı kartı",
       "Pan": "8832",
-      "Amount": 640.00,
+      "Amount": 640.0,
       "Currency": "AZN",
       "Iban": "AZ21RABB00000000123488320000",
       "CardType": "D",
@@ -45,5 +45,10 @@
       "Nickname": "Kapital kartım",
       "CardDetectionType": 2
     }
-  ]
+  ],
+  "VatCard": {
+    "ResultCodes": "Ok",
+    "Balance": 12.5,
+    "PendingBalance": 4.3
+  }
 }
