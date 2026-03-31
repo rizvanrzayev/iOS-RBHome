@@ -58,6 +58,7 @@ struct HomeAccountDTO: Decodable {
         HomeDeposit(
             accountNumber: accountNumber ?? "",
             accountName: accountName ?? "",
+            iban: iban ?? "",
             amount: amount ?? 0,
             currency: currency ?? "",
             calcInterest: calcDepositInterest ?? 0

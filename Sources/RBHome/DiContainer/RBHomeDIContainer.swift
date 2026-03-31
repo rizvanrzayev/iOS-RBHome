@@ -10,7 +10,12 @@ import RBHomePresentation
 public final class RBHomeDIContainer {
     public struct Dependencies {
         public let apiService: APIService
+        public let onCardToCardTap: (Int) -> Void
+        public let onTopupTap: (Int) -> Void
         public let onPaymentsTap: (String) -> Void
+        public let onTransferTap: () -> Void
+        public let onCreditCardPaymentTap: (String) -> Void
+        public let onInstallmentStatementTap: (Int) -> Void
         public let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
         public let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
         public let onLoanPaymentTap: (String) -> Void
@@ -24,7 +29,12 @@ public final class RBHomeDIContainer {
 
         public init(
             apiService: APIService,
+            onCardToCardTap: @escaping (Int) -> Void = { _ in },
+            onTopupTap: @escaping (Int) -> Void = { _ in },
             onPaymentsTap: @escaping (String) -> Void = { _ in },
+            onTransferTap: @escaping () -> Void = {},
+            onCreditCardPaymentTap: @escaping (String) -> Void = { _ in },
+            onInstallmentStatementTap: @escaping (Int) -> Void = { _ in },
             onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onLoanPaymentTap: @escaping (String) -> Void = { _ in },
@@ -37,7 +47,12 @@ public final class RBHomeDIContainer {
             onForeignCitizenVerify: @escaping (URL) -> Void = { _ in }
         ) {
             self.apiService = apiService
+            self.onCardToCardTap = onCardToCardTap
+            self.onTopupTap = onTopupTap
             self.onPaymentsTap = onPaymentsTap
+            self.onTransferTap = onTransferTap
+            self.onCreditCardPaymentTap = onCreditCardPaymentTap
+            self.onInstallmentStatementTap = onInstallmentStatementTap
             self.onSplitBillTap = onSplitBillTap
             self.onChargebackTap = onChargebackTap
             self.onLoanPaymentTap = onLoanPaymentTap
@@ -135,7 +150,11 @@ public final class RBHomeDIContainer {
             fetchBonusUseCase: makeFetchCardBonusUseCase(),
             fetchEDVBalanceUseCase: makeFetchEDVBalanceUseCase(),
             setFavoriteCardUseCase: makeSetFavoriteCardUseCase(),
+            onCardToCardTap: dependencies.onCardToCardTap,
+            onTopupTap: dependencies.onTopupTap,
             onPaymentsTap: dependencies.onPaymentsTap,
+            onCreditCardPaymentTap: dependencies.onCreditCardPaymentTap,
+            onInstallmentStatementTap: dependencies.onInstallmentStatementTap,
             onSplitBillTap: dependencies.onSplitBillTap,
             onChargebackTap: dependencies.onChargebackTap
         )
@@ -145,7 +164,9 @@ public final class RBHomeDIContainer {
     private func makeAccountSegmentVM() -> HomeAccountSegmentViewModel {
         HomeAccountSegmentViewModel(
             fetchAccountsUseCase: makeFetchAccountsUseCase(),
-            fetchRecordsUseCase: makeFetchAccountRecordsUseCase()
+            fetchRecordsUseCase: makeFetchAccountRecordsUseCase(),
+            onPaymentsTap: dependencies.onPaymentsTap,
+            onTransferTap: dependencies.onTransferTap
         )
     }
 
@@ -163,7 +184,11 @@ public final class RBHomeDIContainer {
 
     @MainActor
     private func makeDepositSegmentVM() -> HomeDepositSegmentViewModel {
-        HomeDepositSegmentViewModel(fetchDepositsUseCase: makeFetchDepositsUseCase())
+        HomeDepositSegmentViewModel(
+            fetchDepositsUseCase: makeFetchDepositsUseCase(),
+            onPaymentsTap: dependencies.onPaymentsTap,
+            onTransferTap: dependencies.onTransferTap
+        )
     }
 
     // MARK: - Main ViewModel

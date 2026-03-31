@@ -15,13 +15,19 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
 
     private let fetchAccountsUseCase: FetchAccountsUseCase
     private let fetchRecordsUseCase: FetchAccountRecordsUseCase
+    private let onPaymentsTap: (String) -> Void
+    private let onTransferTap: () -> Void
 
     package init(
         fetchAccountsUseCase: FetchAccountsUseCase,
-        fetchRecordsUseCase: FetchAccountRecordsUseCase
+        fetchRecordsUseCase: FetchAccountRecordsUseCase,
+        onPaymentsTap: @escaping (String) -> Void = { _ in },
+        onTransferTap: @escaping () -> Void = {}
     ) {
         self.fetchAccountsUseCase = fetchAccountsUseCase
         self.fetchRecordsUseCase = fetchRecordsUseCase
+        self.onPaymentsTap = onPaymentsTap
+        self.onTransferTap = onTransferTap
     }
 
     func load() async {
@@ -118,6 +124,11 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
         accounts.first { $0.accountNumber == selectedAccountNumber } ?? accounts.first
     }
 
+    private var paymentSource: String {
+        let iban = selectedAccount?.iban ?? ""
+        return iban.isEmpty ? (selectedAccount?.accountNumber ?? "") : iban
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from accounts: [HomeAccount]) -> RBHomeFlowCarouselModel {
@@ -181,10 +192,16 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
 
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         RBHomeFlowQuickActionsModel(items: [
-            .init(id: "qa-transfer", title: "Köçürmə", icon: .system("arrow.left.arrow.right"), onTap: {}),
-            .init(id: "qa-topup", title: "Doldur", icon: .system("plus.circle.fill"), onTap: {}),
-            .init(id: "qa-convert", title: "Çevir", icon: .system("arrow.2.circlepath"), onTap: {}),
-            .init(id: "qa-statement", title: "Çıxarış", icon: .system("doc.text"), onTap: {})
+            .init(id: "qa-topup", title: "Doldur", icon: .custom(.actionQuickTopup), onTap: onTransferTap),
+            .init(
+                id: "qa-payment",
+                title: "Ödənişlər",
+                icon: .custom(.actionQuickPayment),
+                onTap: { [weak self, onPaymentsTap] in
+                    onPaymentsTap(self?.paymentSource ?? "")
+                }
+            ),
+            .init(id: "qa-transfer", title: "Köçürmə", icon: .custom(.actionQuickTransfer), onTap: onTransferTap)
         ])
     }
 
