@@ -82,6 +82,7 @@ private struct HomeContentView: View {
     }
 }
 
+@MainActor
 private func presentOnboardingModal(
     _ modal: HomeOnboardingModal,
     overlayManager: RBOverlayManager,
