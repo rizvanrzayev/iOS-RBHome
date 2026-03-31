@@ -24,6 +24,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let setFavoriteCardUseCase: SetFavoriteCardUseCase
     private let onCardToCardTap: (Int) -> Void
     private let onTopupTap: (Int) -> Void
+    private let onBonusTap: (Int, String, String) -> Void
     private let onPaymentsTap: (String) -> Void
     private let onCreditCardPaymentTap: (String) -> Void
     private let onInstallmentStatementTap: (Int) -> Void
@@ -40,6 +41,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         setFavoriteCardUseCase: SetFavoriteCardUseCase,
         onCardToCardTap: @escaping (Int) -> Void = { _ in },
         onTopupTap: @escaping (Int) -> Void = { _ in },
+        onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
         onPaymentsTap: @escaping (String) -> Void = { _ in },
         onCreditCardPaymentTap: @escaping (String) -> Void = { _ in },
         onInstallmentStatementTap: @escaping (Int) -> Void = { _ in },
@@ -53,6 +55,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.setFavoriteCardUseCase = setFavoriteCardUseCase
         self.onCardToCardTap = onCardToCardTap
         self.onTopupTap = onTopupTap
+        self.onBonusTap = onBonusTap
         self.onPaymentsTap = onPaymentsTap
         self.onCreditCardPaymentTap = onCreditCardPaymentTap
         self.onInstallmentStatementTap = onInstallmentStatementTap
@@ -248,6 +251,11 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onInstallmentStatementTap(card.cardIdn)
     }
 
+    private func handleBonusTap() {
+        guard let card = selectedCard, card.cardType != .stored, card.cardIdn > 0 else { return }
+        onBonusTap(card.cardIdn, card.name, card.currency)
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from cards: [HomeCard]) -> RBHomeFlowCarouselModel {
@@ -315,7 +323,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 amount: "\(Int(bonus.totalPoint)) xal",
                 detail: "Gözlənilən: \(Int(bonus.currentPoint)) xal"
             ),
-            onTap: {}
+            onTap: { [weak self] in
+                self?.handleBonusTap()
+            }
         )
 
         return .pair(RBHomeFlowRefundPairModel(leading: bonusModel, trailing: edvModel))
