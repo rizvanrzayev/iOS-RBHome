@@ -54,6 +54,22 @@ package final class HomeCardRepositoryImpl: HomeCardRepository {
         }
     }
 
+    package func fetchStoredCardTransactions(token: String) async throws -> [HomeCardTransaction] {
+        try await withCheckedThrowingContinuation { continuation in
+            let endpoint = HomePlasticEndpoint.listStoredTransactions(token: token)
+                .makeHomeRequest(type: HomeCardTransactionsResponseDTO.self)
+            dataTransferService.request(with: endpoint, on: backgroundQueue) { [weak self] result in
+                guard let self else { return }
+                switch result {
+                case .success(let response):
+                    continuation.resume(returning: response.list?.map { $0.toEntity() } ?? [])
+                case .failure(let error):
+                    continuation.resume(throwing: self.errorHandler.handle(error))
+                }
+            }
+        }
+    }
+
     package func fetchEDVBalance() async throws -> HomeEDVBalance? {
         try await withCheckedThrowingContinuation { continuation in
             let endpoint = HomePlasticEndpoint.listCards

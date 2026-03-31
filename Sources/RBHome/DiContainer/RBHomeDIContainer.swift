@@ -9,9 +9,14 @@ import RBHomePresentation
 public final class RBHomeDIContainer {
     public struct Dependencies {
         public let apiService: APIService
+        public let onPaymentsTap: (String) -> Void
 
-        public init(apiService: APIService) {
+        public init(
+            apiService: APIService,
+            onPaymentsTap: @escaping (String) -> Void = { _ in }
+        ) {
             self.apiService = apiService
+            self.onPaymentsTap = onPaymentsTap
         }
     }
 
@@ -98,7 +103,8 @@ public final class RBHomeDIContainer {
             fetchTransactionsUseCase: makeFetchCardTransactionsUseCase(),
             fetchBonusUseCase: makeFetchCardBonusUseCase(),
             fetchEDVBalanceUseCase: makeFetchEDVBalanceUseCase(),
-            setFavoriteCardUseCase: makeSetFavoriteCardUseCase()
+            setFavoriteCardUseCase: makeSetFavoriteCardUseCase(),
+            onPaymentsTap: dependencies.onPaymentsTap
         )
     }
 

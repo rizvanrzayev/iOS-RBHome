@@ -10,4 +10,8 @@ package final class FetchCardTransactionsUseCaseImpl: FetchCardTransactionsUseCa
     package func execute(cardIdn: Int) async throws -> [HomeCardTransaction] {
         return try await repository.fetchCardTransactions(cardIdn: cardIdn)
     }
+
+    package func execute(token: String) async throws -> [HomeCardTransaction] {
+        try await repository.fetchStoredCardTransactions(token: token)
+    }
 }

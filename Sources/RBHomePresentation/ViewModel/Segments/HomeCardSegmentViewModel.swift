@@ -11,6 +11,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     private var cards: [HomeCard] = []
     private var selectedCardIdn: Int?
+    private var selectedCardToken: String?
     private var bonusPerCard: [Int: HomeCardBonusPoint] = [:]
     private var rawTransactions: [HomeCardTransaction] = []
     private var panelSearchText: String = ""
@@ -21,6 +22,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let fetchBonusUseCase: FetchCardBonusUseCase
     private let fetchEDVBalanceUseCase: FetchEDVBalanceUseCase
     private let setFavoriteCardUseCase: SetFavoriteCardUseCase
+    private let onPaymentsTap: (String) -> Void
 
     private var edvBalance: HomeEDVBalance?
 
@@ -29,13 +31,15 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         fetchTransactionsUseCase: FetchCardTransactionsUseCase,
         fetchBonusUseCase: FetchCardBonusUseCase,
         fetchEDVBalanceUseCase: FetchEDVBalanceUseCase,
-        setFavoriteCardUseCase: SetFavoriteCardUseCase
+        setFavoriteCardUseCase: SetFavoriteCardUseCase,
+        onPaymentsTap: @escaping (String) -> Void = { _ in }
     ) {
         self.fetchCardsUseCase = fetchCardsUseCase
         self.fetchTransactionsUseCase = fetchTransactionsUseCase
         self.fetchBonusUseCase = fetchBonusUseCase
         self.fetchEDVBalanceUseCase = fetchEDVBalanceUseCase
         self.setFavoriteCardUseCase = setFavoriteCardUseCase
+        self.onPaymentsTap = onPaymentsTap
     }
 
     func load() async {
@@ -56,9 +60,13 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
             } else {
                 cardsState = .loaded(makeCarousel(from: fetched))
-                if let first = fetched.first(where: { $0.cardType != .stored }) {
-                    selectedCardIdn = first.cardIdn
-                    await loadCardDetails(cardIdn: first.cardIdn)
+                if let first = fetched.first {
+                    selectCard(first)
+                    if let token = first.token, first.cardType == .stored {
+                        await loadStoredCardDetails(token: token)
+                    } else {
+                        await loadCardDetails(cardIdn: first.cardIdn)
+                    }
                 } else {
                     bonusSectionState = .loaded(.edvOnly(edvPlaceholderModel))
                     panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
@@ -73,16 +81,23 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     func onCardSelected(cardId: String) async {
         let selected = cards.first { String($0.cardIdn) == cardId || $0.token == cardId }
-        guard let selected, selected.cardIdn != selectedCardIdn || selected.token != nil else { return }
+        guard let selected else { return }
+        let selectedKey = selected.token ?? String(selected.cardIdn)
+        guard selectedKey != currentSelectedCardKey else { return }
 
         if selected.cardType == .stored {
-            selectedCardIdn = 0
+            selectCard(selected)
             bonusSectionState = .loaded(.edvOnly(edvPlaceholderModel))
-            panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
+            panelState = .loading
+            if let token = selected.token {
+                await loadStoredCardDetails(token: token)
+            } else {
+                panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
+            }
             return
         }
 
-        selectedCardIdn = selected.cardIdn
+        selectCard(selected)
         bonusSectionState = .loading
         panelState = .loading
         await loadCardDetails(cardIdn: selected.cardIdn)
@@ -103,6 +118,23 @@ package final class HomeCardSegmentViewModel: ObservableObject {
             rebuildPanel()
         } catch {
             bonusSectionState = .error(title: "Xəta", message: error.localizedDescription)
+            panelState = .error(title: "Xəta", message: error.localizedDescription)
+        }
+    }
+
+    private func loadStoredCardDetails(token: String) async {
+        do {
+            bonusSectionState = .loaded(.edvOnly(edvPlaceholderModel))
+            let transactions = try await fetchTransactionsUseCase.execute(token: token)
+            rawTransactions = transactions
+            panelSearchText = ""
+            panelDateFilter = nil
+            rebuildCarousel()
+            rebuildPanel()
+            if transactions.isEmpty {
+                panelState = .empty(title: "Əməliyyat yoxdur", message: nil)
+            }
+        } catch {
             panelState = .error(title: "Xəta", message: error.localizedDescription)
         }
     }
@@ -153,7 +185,30 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     }
 
     private var selectedCard: HomeCard? {
-        cards.first { $0.cardIdn == selectedCardIdn } ?? cards.first
+        if let selectedCardToken {
+            return cards.first { $0.token == selectedCardToken }
+        }
+        if let selectedCardIdn {
+            return cards.first { $0.cardIdn == selectedCardIdn }
+        }
+        return cards.first
+    }
+
+    private var currentSelectedCardKey: String? {
+        selectedCardToken ?? selectedCardIdn.map(String.init)
+    }
+
+    private func selectCard(_ card: HomeCard) {
+        selectedCardIdn = card.cardType == .stored ? nil : card.cardIdn
+        selectedCardToken = card.token
+    }
+
+    private func paymentSource(for card: HomeCard?) -> String {
+        guard let card else { return "" }
+        if card.cardType == .stored {
+            return card.token ?? ""
+        }
+        return card.iban ?? ""
     }
 
     // MARK: - Mappers
@@ -282,26 +337,54 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private var homeQuickActions: RBHomeFlowQuickActionsModel {
         if selectedCard?.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
+                .init(
+                    id: "qa-payment",
+                    title: "Ödənişlər",
+                    icon: .custom(.actionQuickPayment),
+                    onTap: { [weak self, onPaymentsTap] in
+                        onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
+                    }
+                )
             ])
         }
         return RBHomeFlowQuickActionsModel(items: [
             .init(id: "qa-transfer", title: "Karta Köçürmə", icon: .custom(.actionQuickTransfer), onTap: {}),
             .init(id: "qa-deposit", title: "Mədaxil", icon: .custom(.actionQuickTopup), onTap: {}),
-            .init(id: "qa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
+            .init(
+                id: "qa-payment",
+                title: "Ödənişlər",
+                icon: .custom(.actionQuickPayment),
+                onTap: { [weak self, onPaymentsTap] in
+                    onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
+                }
+            )
         ])
     }
 
     private var detailQuickActions: RBHomeFlowQuickActionsModel {
         if selectedCard?.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
+                .init(
+                    id: "dqa-payment",
+                    title: "Ödənişlər",
+                    icon: .custom(.actionQuickPayment),
+                    onTap: { [weak self, onPaymentsTap] in
+                        onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
+                    }
+                )
             ])
         }
         return RBHomeFlowQuickActionsModel(items: [
             .init(id: "dqa-transfer", title: "Karta Köçürmə", icon: .custom(.actionQuickTransfer), onTap: {}),
             .init(id: "dqa-deposit", title: "Mədaxil", icon: .custom(.actionQuickTopup), onTap: {}),
-            .init(id: "dqa-payment", title: "Ödənişlər", icon: .custom(.actionQuickPayment), onTap: {})
+            .init(
+                id: "dqa-payment",
+                title: "Ödənişlər",
+                icon: .custom(.actionQuickPayment),
+                onTap: { [weak self, onPaymentsTap] in
+                    onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
+                }
+            )
         ])
     }
 
