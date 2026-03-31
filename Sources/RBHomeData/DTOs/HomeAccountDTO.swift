@@ -14,6 +14,9 @@ struct HomeAccountDTO: Decodable {
     let amount: Double?
     let currency: String?
     let contractNumber: String?
+    let isMortgage: Bool?
+    let mortgageID: String?
+    let birthDate: String?
     let calcDepositInterest: Double?
 
     enum CodingKeys: String, CodingKey {
@@ -23,6 +26,9 @@ struct HomeAccountDTO: Decodable {
         case amount = "Amount"
         case currency = "Currency"
         case contractNumber = "ContractNumber"
+        case isMortgage = "IsMortgage"
+        case mortgageID = "MortgageId"
+        case birthDate = "BirthDate"
         case calcDepositInterest = "CalcDepositInterest"
     }
 
@@ -41,7 +47,10 @@ struct HomeAccountDTO: Decodable {
             contractNumber: contractNumber ?? accountNumber ?? "",
             accountName: accountName ?? "",
             amount: amount ?? 0,
-            currency: currency ?? ""
+            currency: currency ?? "",
+            isMortgage: isMortgage ?? false,
+            mortgageID: mortgageID ?? "",
+            birthDate: birthDate ?? ""
         )
     }
 

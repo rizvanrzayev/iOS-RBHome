@@ -17,6 +17,18 @@
       "Currency": "AZN",
       "ContractNumber": "CR-2024-002",
       "CalcDepositInterest": 0.0
+    },
+    {
+      "AccountNumber": "LN00003",
+      "AccountName": "İpoteka krediti",
+      "Iban": "",
+      "Amount": 74200.00,
+      "Currency": "AZN",
+      "ContractNumber": "MTG-2024-003",
+      "IsMortgage": true,
+      "MortgageId": "MORT-900123",
+      "BirthDate": "1990-05-17",
+      "CalcDepositInterest": 0.0
     }
   ]
 }

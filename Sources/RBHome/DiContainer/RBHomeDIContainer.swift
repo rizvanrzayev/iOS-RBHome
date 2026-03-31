@@ -11,6 +11,7 @@ public final class RBHomeDIContainer {
         public let apiService: APIService
         public let onPaymentsTap: (String) -> Void
         public let onLoanPaymentTap: (String) -> Void
+        public let onMortgageLoanPaymentTap: (String, String) -> Void
         public let onLoanOrderTap: () -> Void
         public let onLoanRequestTap: () -> Void
 
@@ -18,12 +19,14 @@ public final class RBHomeDIContainer {
             apiService: APIService,
             onPaymentsTap: @escaping (String) -> Void = { _ in },
             onLoanPaymentTap: @escaping (String) -> Void = { _ in },
+            onMortgageLoanPaymentTap: @escaping (String, String) -> Void = { _, _ in },
             onLoanOrderTap: @escaping () -> Void = {},
             onLoanRequestTap: @escaping () -> Void = {}
         ) {
             self.apiService = apiService
             self.onPaymentsTap = onPaymentsTap
             self.onLoanPaymentTap = onLoanPaymentTap
+            self.onMortgageLoanPaymentTap = onMortgageLoanPaymentTap
             self.onLoanOrderTap = onLoanOrderTap
             self.onLoanRequestTap = onLoanRequestTap
         }
@@ -131,6 +134,7 @@ public final class RBHomeDIContainer {
             fetchLoansUseCase: makeFetchLoansUseCase(),
             fetchScheduleUseCase: makeFetchLoanScheduleUseCase(),
             onLoanPaymentTap: dependencies.onLoanPaymentTap,
+            onMortgageLoanPaymentTap: dependencies.onMortgageLoanPaymentTap,
             onLoanOrderTap: dependencies.onLoanOrderTap,
             onLoanRequestTap: dependencies.onLoanRequestTap
         )

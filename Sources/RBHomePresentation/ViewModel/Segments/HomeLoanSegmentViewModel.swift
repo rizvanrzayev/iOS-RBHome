@@ -28,6 +28,7 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
     private let fetchLoansUseCase: FetchLoansUseCase
     private let fetchScheduleUseCase: FetchLoanScheduleUseCase
     private let onLoanPaymentTap: (String) -> Void
+    private let onMortgageLoanPaymentTap: (String, String) -> Void
     private let onLoanOrderTap: () -> Void
     private let onLoanRequestTap: () -> Void
 
@@ -35,12 +36,14 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         fetchLoansUseCase: FetchLoansUseCase,
         fetchScheduleUseCase: FetchLoanScheduleUseCase,
         onLoanPaymentTap: @escaping (String) -> Void = { _ in },
+        onMortgageLoanPaymentTap: @escaping (String, String) -> Void = { _, _ in },
         onLoanOrderTap: @escaping () -> Void = {},
         onLoanRequestTap: @escaping () -> Void = {}
     ) {
         self.fetchLoansUseCase = fetchLoansUseCase
         self.fetchScheduleUseCase = fetchScheduleUseCase
         self.onLoanPaymentTap = onLoanPaymentTap
+        self.onMortgageLoanPaymentTap = onMortgageLoanPaymentTap
         self.onLoanOrderTap = onLoanOrderTap
         self.onLoanRequestTap = onLoanRequestTap
     }
@@ -146,8 +149,13 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         loans.first { $0.contractNumber == selectedContractNumber } ?? loans.first
     }
 
-    private var selectedContract: String {
-        selectedLoan?.contractNumber ?? ""
+    private func handleLoanPaymentTap() {
+        guard let selectedLoan else { return }
+        if selectedLoan.isMortgage {
+            onMortgageLoanPaymentTap(selectedLoan.birthDate, selectedLoan.mortgageID)
+        } else {
+            onLoanPaymentTap(selectedLoan.contractNumber)
+        }
     }
 
     // MARK: - Mappers
@@ -222,8 +230,8 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
                 id: "qa-pay-loan",
                 title: "Loan payment",
                 icon: .custom(.actionQuickPayment),
-                onTap: { [selectedContract, onLoanPaymentTap] in
-                    onLoanPaymentTap(selectedContract)
+                onTap: { [weak self] in
+                    self?.handleLoanPaymentTap()
                 }
             ),
             .init(

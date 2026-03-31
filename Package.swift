@@ -46,6 +46,10 @@ let package = Package(
         .library(
             name: "RBHome",
             targets: ["RBHome"]
+        ),
+        .library(
+            name: "RBHomeData",
+            targets: ["RBHomeData"]
         )
     ],
     dependencies: [
