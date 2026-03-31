@@ -37,8 +37,12 @@ extension RBHomeFlowPage {
             }
             .simultaneousGesture(swipeBackGesture)
             .coordinateSpace(name: "homeFlowRoot")
-            .onAppear { swipeContainerWidth = proxy.size.width }
+            .onAppear {
+                swipeContainerWidth = proxy.size.width
+                swipeContainerHeight = proxy.size.height
+            }
             .onChange(of: proxy.size.width) { swipeContainerWidth = $0 }
+            .onChange(of: proxy.size.height) { swipeContainerHeight = $0 }
             .onPreferenceChange(RBHomeFlowContentBottomKey.self) { bottomY in
                 guard let bottomY else { return }
                 let newHeight = max(
@@ -99,7 +103,15 @@ extension RBHomeFlowPage {
     @ViewBuilder
     func segmentContent(for segment: RBHomeFlowSegment) -> some View {
         let segmentPayload = payload(for: segment)
-        carouselSection(state: segmentPayload.home.cardsState, segment: segment, onRetry: onRetry)
+        let isActive = segment == activeSegment
+        carouselSection(
+            state: segmentPayload.home.cardsState,
+            segment: segment,
+            externalDragOffset: isActive ? carouselDragOffset : 0,
+            externalPageCommit: isActive ? carouselPageCommit : nil,
+            onStepChanged: { step in carouselStep = step },
+            onRetry: onRetry
+        )
         ZStack(alignment: .top) {
             VStack(alignment: .leading, spacing: RBHomeFlowLayout.sectionVerticalSpacing) {
                 segmentHomeBody(segmentPayload.home)

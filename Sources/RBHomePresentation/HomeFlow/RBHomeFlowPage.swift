@@ -29,7 +29,15 @@ public struct RBHomeFlowPage: View {
     @State var dynamicPeekHeight: CGFloat = RBHomeFlowLayout.floatingPanelPeekHeight
     @State var panelCollapseToken: UUID = UUID()
     @State var swipeContainerWidth: CGFloat = UIScreen.main.bounds.width
+    @State var swipeContainerHeight: CGFloat = UIScreen.main.bounds.height
     @State var isBalanceVisible: Bool = true
+
+    // Carousel gesture coordination
+    @GestureState(
+        resetTransaction: Transaction(animation: .spring(response: 0.3, dampingFraction: 0.85))
+    ) var carouselDragOffset: CGFloat = 0
+    @State var carouselStep: CGFloat = 1
+    @State var carouselPageCommit: CarouselPageCommit? = nil
 
     public init(
         data: RBHomeFlowPageData,

@@ -13,6 +13,9 @@ extension RBHomeFlowPage {
     func carouselSection(
         state: RBHomeFlowSectionState<RBHomeFlowCarouselModel>,
         segment: RBHomeFlowSegment,
+        externalDragOffset: CGFloat = 0,
+        externalPageCommit: CarouselPageCommit? = nil,
+        onStepChanged: ((CGFloat) -> Void)? = nil,
         onRetry: (() -> Void)? = nil
     ) -> some View {
         if case .error(let title, let message) = state {
@@ -23,8 +26,11 @@ extension RBHomeFlowPage {
                     items: model.items,
                     selectedId: selectedProductId,
                     detailRevealProgress: detailRevealProgress,
+                    externalDragOffset: externalDragOffset,
+                    externalPageCommit: externalPageCommit,
                     onSelect: handlePrimaryItemTap,
                     onFocusChange: handlePrimaryItemFocusChange,
+                    onStepChanged: onStepChanged,
                     layout: .homeFlowDefault,
                     shellStyle: { item in
                         if item.isStored {

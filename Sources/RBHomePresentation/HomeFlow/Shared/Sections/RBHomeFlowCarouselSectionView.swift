@@ -32,12 +32,22 @@ struct RBHomeFlowCarouselLayoutConfig {
     }
 }
 
+/// Signals the carousel to animate to a specific page from an external gesture.
+struct CarouselPageCommit: Equatable {
+    let page: Int
+    let token: UUID
+    init(page: Int) { self.page = page; self.token = UUID() }
+}
+
 struct RBHomeFlowProductCarouselSectionView<Item: Identifiable, Content: View, DetailContent: View>: View where Item.ID == String {
     let items: [Item]
     let selectedId: String?
     let detailRevealProgress: CGFloat
+    let externalDragOffset: CGFloat
+    let externalPageCommit: CarouselPageCommit?
     let onSelect: (String) -> Void
     let onFocusChange: (String) -> Void
+    let onStepChanged: ((CGFloat) -> Void)?
     let layout: RBHomeFlowCarouselLayoutConfig
     let shellStyle: (Item) -> RBProductCardShellStyle
     let content: (Item) -> Content
@@ -68,7 +78,9 @@ struct RBHomeFlowProductCarouselSectionView<Item: Identifiable, Content: View, D
             spacing: layout.detailPanelSpacing,
             trailingPeek: interpolatedTrailingPeek,
             scalesSpacingAndPeekWithViewport: false,
-            showsIndicator: true
+            showsIndicator: true,
+            externalDragOffset: externalDragOffset,
+            onStepChanged: onStepChanged
         ) { item in
             cardShell(for: item)
                 .contentShape(Rectangle())
@@ -91,6 +103,11 @@ struct RBHomeFlowProductCarouselSectionView<Item: Identifiable, Content: View, D
             guard focusedId != selectedId else { return }
             pendingFocusIds.insert(focusedId)
             onFocusChange(focusedId)
+        }
+        .onChange(of: externalPageCommit) { commit in
+            guard let commit, items.indices.contains(commit.page), commit.page != currentPage else { return }
+            // Animate to the committed page — .animation(value: currentPage) on HStack handles the spring.
+            currentPage = commit.page
         }
     }
 
