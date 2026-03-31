@@ -91,8 +91,8 @@ extension RBHomeFlowPage {
 
     var activeCarouselCurrentPage: Int {
         guard case .loaded(let model) = payload(for: activeSegment).home.cardsState,
-              let selectedId,
-              let index = model.items.firstIndex(where: { $0.id == selectedId })
+              let selectedProductId,
+              let index = model.items.firstIndex(where: { $0.id == selectedProductId })
         else { return 0 }
         return index
     }
