@@ -3,12 +3,26 @@ import RBHomeDomain
 
 @MainActor
 package final class HomeLoanSegmentViewModel: ObservableObject {
+    private enum LoanRecordFilter: Int {
+        case ongoing
+        case paid
+
+        var title: String {
+            switch self {
+            case .ongoing: return "Davam edən"
+            case .paid: return "Ödənmiş"
+            }
+        }
+    }
+
     @Published var cardsState: RBHomeFlowSectionState<RBHomeFlowCarouselModel> = .loading
     @Published var scheduleState: RBHomeFlowSectionState<RBHomeFlowInfoListModel> = .loading
     @Published var panelState: RBHomeFlowSectionState<RBHomeFlowPanelModel> = .loading
 
     private var loans: [HomeLoan] = []
     private var selectedContractNumber: String?
+    private var selectedFilter: LoanRecordFilter = .ongoing
+    private var allScheduleRecords: [HomeLoanScheduleRecord] = []
 
     private let fetchLoansUseCase: FetchLoansUseCase
     private let fetchScheduleUseCase: FetchLoanScheduleUseCase
@@ -51,24 +65,48 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
     func onLoanSelected(contractNumber: String) async {
         guard contractNumber != selectedContractNumber else { return }
         selectedContractNumber = contractNumber
+        selectedFilter = .ongoing
         scheduleState = .loading
         panelState = .loading
         await loadSchedule(contractNumber: contractNumber)
     }
 
+    func onFilterSelected(index: Int) {
+        guard let filter = LoanRecordFilter(rawValue: index), filter != selectedFilter else { return }
+        selectedFilter = filter
+        rebuildPanel()
+    }
+
     private func loadSchedule(contractNumber: String) async {
         do {
             let records = try await fetchScheduleUseCase.execute(contractNumber: contractNumber)
+            allScheduleRecords = records
             let ongoing = records.filter { $0.isOngoing }
             scheduleState = ongoing.isEmpty
                 ? .empty(title: "Ödəniş qrafiki yoxdur", message: nil)
                 : .loaded(makeScheduleList(from: ongoing))
-            panelState = records.isEmpty
-                ? .empty(title: "Ödəniş tarixi yoxdur", message: nil)
-                : .loaded(makePanel(from: records))
+            rebuildPanel()
         } catch {
+            allScheduleRecords = []
             scheduleState = .error(title: "Xəta", message: error.localizedDescription)
             panelState = .error(title: "Xəta", message: error.localizedDescription)
+        }
+    }
+
+    private func rebuildPanel() {
+        guard !allScheduleRecords.isEmpty else {
+            panelState = .empty(title: "Ödəniş tarixi yoxdur", message: nil)
+            return
+        }
+        panelState = .loaded(makePanel(from: filteredRecords()))
+    }
+
+    private func filteredRecords() -> [HomeLoanScheduleRecord] {
+        switch selectedFilter {
+        case .ongoing:
+            return allScheduleRecords.filter(\.isOngoing)
+        case .paid:
+            return allScheduleRecords.filter { !$0.isOngoing }
         }
     }
 
@@ -147,7 +185,14 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
                     amount: "-\(HomeAmountFormatter.format(total, currency: "AZN"))",
                     isCredit: false
                 )
-            }
+            },
+            segmentedControl: .init(
+                selectedIndex: selectedFilter.rawValue,
+                items: [LoanRecordFilter.ongoing.title, LoanRecordFilter.paid.title],
+                onSelectionChange: { [weak self] index in
+                    self?.onFilterSelected(index: index)
+                }
+            )
         )
     }
 

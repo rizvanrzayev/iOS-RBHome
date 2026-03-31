@@ -121,6 +121,24 @@ public struct RBHomeFlowQuickActionsModel {
     }
 }
 
+// MARK: - Segmented Control
+
+public struct RBHomeFlowSegmentedControlModel {
+    public let selectedIndex: Int
+    public let items: [String]
+    public let onSelectionChange: (Int) -> Void
+
+    public init(
+        selectedIndex: Int,
+        items: [String],
+        onSelectionChange: @escaping (Int) -> Void
+    ) {
+        self.selectedIndex = selectedIndex
+        self.items = items
+        self.onSelectionChange = onSelectionChange
+    }
+}
+
 // MARK: - Bonus Summary
 
 public struct RBHomeFlowBonusSummaryItem: Identifiable {
@@ -262,17 +280,20 @@ extension RBHomeFlowPanelFilter {
 public struct RBHomeFlowPanelModel {
     public let title: String
     public let items: [RBHomeFlowPanelItem]
+    public let segmentedControl: RBHomeFlowSegmentedControlModel?
     public let onSearchChange: ((String) -> Void)?
     public let onFilterChange: ((RBHomeFlowPanelFilter?) -> Void)?
 
     public init(
         title: String,
         items: [RBHomeFlowPanelItem],
+        segmentedControl: RBHomeFlowSegmentedControlModel? = nil,
         onSearchChange: ((String) -> Void)? = nil,
         onFilterChange: ((RBHomeFlowPanelFilter?) -> Void)? = nil
     ) {
         self.title = title
         self.items = items
+        self.segmentedControl = segmentedControl
         self.onSearchChange = onSearchChange
         self.onFilterChange = onFilterChange
     }

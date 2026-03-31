@@ -33,50 +33,61 @@ struct RBHomeFlowTransactionsPanelContent: View {
     }
 
     private func loadedScrollView(model: RBHomeFlowPanelModel) -> some View {
-        guard !model.items.isEmpty else {
-            return AnyView(
-                RBEmptyState(title: "Əməliyyat yoxdur", message: nil, layout: .inline)
-                    .frame(maxWidth: .infinity)
-                    .padding(.top, 16)
-            )
-        }
         return AnyView(ScrollView {
             LazyVStack(alignment: .leading, spacing: 0) {
-                // Pull-down overscroll detection: minY > 0 = content pulled below natural position
-                GeometryReader { geo in
-                    Color.clear.preference(
-                        key: PanelScrollOffsetKey.self,
-                        value: geo.frame(in: .named("panelScroll")).minY
+                if let segmentedControl = model.segmentedControl {
+                    RBSegmentedControl(
+                        selection: Binding(
+                            get: { segmentedControl.selectedIndex },
+                            set: { segmentedControl.onSelectionChange($0) }
+                        ),
+                        items: segmentedControl.items
                     )
+                    .padding(.horizontal, 24)
+                    .padding(.top, 8)
+                    .padding(.bottom, model.items.isEmpty ? 0 : 8)
                 }
-                .frame(height: 0)
 
-                ForEach(Array(model.items.enumerated()), id: \.element.id) { index, item in
-                    let showsDateHeader = item.date != nil &&
-                        (index == 0 || item.date != model.items[index - 1].date)
-
-                    if showsDateHeader, let date = item.date {
-                        Text(date)
-                            .font(.system(size: 12, weight: .bold))
-                            .foregroundStyle(Color.rb.textSecondary)
-                            .padding(.horizontal, 24)
-                            .padding(.top, index == 0 ? 8 : 16)
-                            .padding(.bottom, 8)
+                if model.items.isEmpty {
+                    RBEmptyState(title: "Əməliyyat yoxdur", message: nil, layout: .inline)
+                        .frame(maxWidth: .infinity)
+                        .padding(.top, 16)
+                } else {
+                    GeometryReader { geo in
+                        Color.clear.preference(
+                            key: PanelScrollOffsetKey.self,
+                            value: geo.frame(in: .named("panelScroll")).minY
+                        )
                     }
+                    .frame(height: 0)
 
-                    RBTransactionRow(model: .init(
-                        id: item.id,
-                        title: item.title,
-                        subtitle: item.subtitle,
-                        amount: isBalanceVisible ? item.amount : "••••",
-                        isCredit: item.isCredit,
-                        iconURL: item.iconURL,
-                        iconColorHex: item.iconColorHex
-                    ))
+                    ForEach(Array(model.items.enumerated()), id: \.element.id) { index, item in
+                        let showsDateHeader = item.date != nil &&
+                            (index == 0 || item.date != model.items[index - 1].date)
 
-                    if index < model.items.count - 1 {
-                        Divider()
-                            .padding(.leading, 84)
+                        if showsDateHeader, let date = item.date {
+                            Text(date)
+                                .font(.system(size: 12, weight: .bold))
+                                .foregroundStyle(Color.rb.textSecondary)
+                                .padding(.horizontal, 24)
+                                .padding(.top, index == 0 ? 8 : 16)
+                                .padding(.bottom, 8)
+                        }
+
+                        RBTransactionRow(model: .init(
+                            id: item.id,
+                            title: item.title,
+                            subtitle: item.subtitle,
+                            amount: isBalanceVisible ? item.amount : "••••",
+                            isCredit: item.isCredit,
+                            iconURL: item.iconURL,
+                            iconColorHex: item.iconColorHex
+                        ))
+
+                        if index < model.items.count - 1 {
+                            Divider()
+                                .padding(.leading, 84)
+                        }
                     }
                 }
             }
