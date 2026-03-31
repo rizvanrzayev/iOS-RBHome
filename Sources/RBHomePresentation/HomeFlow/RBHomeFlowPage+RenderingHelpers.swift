@@ -60,9 +60,10 @@ extension RBHomeFlowPage {
                         title: item.title,
                         maskedNumber: .init(item.subtitle),
                         brandImageName: item.networkAsset,
-                        trailingIcons: .init(showsEye: false, showsFavorite: false),
-                        bottomLeadingLabel: item.bottomLeadingLabel
-                    )
+                        trailingIcons: .init(showsEye: true, isEyeOpen: isBalanceVisible, showsFavorite: false),
+                        bottomLeadingLabel: isBalanceVisible ? item.bottomLeadingLabel : item.bottomLeadingLabel.map { _ in "••••" }
+                    ),
+                    onTapEye: { isBalanceVisible.toggle() }
                 )
             }
         case .account, .credit, .deposit:
@@ -91,9 +92,9 @@ extension RBHomeFlowPage {
         rbHomeFlowSectionStateView(state, minHeight: 86, skeleton: { RBHomeFlowBonusSummarySkeleton() }) { section in
             switch section {
             case .pair(let model):
-                RBHomeFlowRefundPairSectionView(model: model)
+                RBHomeFlowRefundPairSectionView(model: maskedBonusPair(model))
             case .edvOnly(let model):
-                RBHomeFlowEDVRefundSectionView(model: model)
+                RBHomeFlowEDVRefundSectionView(model: maskedEDVModel(model))
             }
         }
         .padding(.horizontal, 12)
@@ -116,6 +117,9 @@ extension RBHomeFlowPage {
     }
 
     private func amountText(_ rawValue: String) -> RBProductCardAmountText {
+        guard isBalanceVisible else {
+            return .init(primary: "••••")
+        }
         let parts = rawValue.split(separator: " ")
         guard parts.count > 1 else {
             return .init(primary: rawValue)
@@ -124,5 +128,19 @@ extension RBHomeFlowPage {
         let secondary = rawSecondary == "AZN" ? "₼" : rawSecondary
         let primary = parts.dropLast().joined(separator: " ")
         return .init(primary: primary, secondary: secondary)
+    }
+
+    private func maskedStatContent(_ content: RBStatCardContent) -> RBStatCardContent {
+        guard !isBalanceVisible, case .data = content else { return content }
+        return .data(amount: "••••", detail: "••••")
+    }
+
+    private func maskedEDVModel(_ model: RBHomeFlowEDVRefundModel) -> RBHomeFlowEDVRefundModel {
+        .init(icon: model.icon, title: model.title, titleColor: model.titleColor,
+              content: maskedStatContent(model.content), onTap: model.onTap)
+    }
+
+    private func maskedBonusPair(_ model: RBHomeFlowRefundPairModel) -> RBHomeFlowRefundPairModel {
+        .init(leading: maskedEDVModel(model.leading), trailing: maskedEDVModel(model.trailing))
     }
 }

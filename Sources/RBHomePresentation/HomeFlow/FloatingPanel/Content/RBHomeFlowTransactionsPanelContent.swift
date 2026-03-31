@@ -12,6 +12,7 @@ struct RBHomeFlowTransactionsPanelContent: View {
     let state: RBHomeFlowSectionState<RBHomeFlowPanelModel>
     let isExpanded: Bool
     let collapse: () -> Void
+    var isBalanceVisible: Bool = true
 
     var body: some View {
         switch state {
@@ -67,7 +68,7 @@ struct RBHomeFlowTransactionsPanelContent: View {
                         id: item.id,
                         title: item.title,
                         subtitle: item.subtitle,
-                        amount: item.amount,
+                        amount: isBalanceVisible ? item.amount : "••••",
                         isCredit: item.isCredit,
                         iconURL: item.iconURL,
                         iconColorHex: item.iconColorHex

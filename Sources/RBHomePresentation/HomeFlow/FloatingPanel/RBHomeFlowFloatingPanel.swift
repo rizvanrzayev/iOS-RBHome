@@ -15,6 +15,7 @@ struct RBHomeFlowFloatingPanel: View {
     let peekHeight: CGFloat
     let fullHeight: CGFloat
     let collapseID: AnyHashable
+    let isBalanceVisible: Bool
     let onExpandedChanged: (Bool) -> Void
 
     private var isActionsPanel: Bool {
@@ -41,7 +42,7 @@ struct RBHomeFlowFloatingPanel: View {
                             RBHomeFlowPanelSectionHeader(model: model, expand: expand, collapse: collapse)
                         }
                         RBHomeFlowTransactionsPanelContent(
-                            state: state, isExpanded: isExpanded, collapse: collapse)
+                            state: state, isExpanded: isExpanded, collapse: collapse, isBalanceVisible: isBalanceVisible)
                     }
                     .transition(.asymmetric(
                         insertion: .move(edge: .bottom).combined(with: .opacity),

@@ -28,6 +28,7 @@ public struct RBHomeFlowPage: View {
     @State var dynamicPeekHeight: CGFloat = RBHomeFlowLayout.floatingPanelPeekHeight
     @State var panelCollapseToken: UUID = UUID()
     @State var swipeContainerWidth: CGFloat = UIScreen.main.bounds.width
+    @State var isBalanceVisible: Bool = true
 
     public init(
         data: RBHomeFlowPageData,

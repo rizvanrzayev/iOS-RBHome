@@ -30,6 +30,7 @@ extension RBHomeFlowPage {
                     peekHeight: dynamicPeekHeight,
                     fullHeight: fullHeight,
                     collapseID: AnyHashable(panelCollapseToken),
+                    isBalanceVisible: isBalanceVisible,
                     onExpandedChanged: { _ in }
                 )
                 .ignoresSafeArea(edges: .bottom)
