@@ -268,7 +268,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
     // MARK: - Favorite
 
-    func toggleFavorite(cardId: String) {
+    package func toggleFavorite(cardId: String) {
         guard let card = cards.first(where: { ($0.token ?? String($0.cardIdn)) == cardId }),
               card.cardType != .stored else { return }
         Task {
