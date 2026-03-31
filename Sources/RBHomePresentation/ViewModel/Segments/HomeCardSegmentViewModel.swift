@@ -23,6 +23,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let fetchEDVBalanceUseCase: FetchEDVBalanceUseCase
     private let setFavoriteCardUseCase: SetFavoriteCardUseCase
     private let onPaymentsTap: (String) -> Void
+    private let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
+    private let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
 
     private var edvBalance: HomeEDVBalance?
 
@@ -32,7 +34,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         fetchBonusUseCase: FetchCardBonusUseCase,
         fetchEDVBalanceUseCase: FetchEDVBalanceUseCase,
         setFavoriteCardUseCase: SetFavoriteCardUseCase,
-        onPaymentsTap: @escaping (String) -> Void = { _ in }
+        onPaymentsTap: @escaping (String) -> Void = { _ in },
+        onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
+        onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in }
     ) {
         self.fetchCardsUseCase = fetchCardsUseCase
         self.fetchTransactionsUseCase = fetchTransactionsUseCase
@@ -40,6 +44,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.fetchEDVBalanceUseCase = fetchEDVBalanceUseCase
         self.setFavoriteCardUseCase = setFavoriteCardUseCase
         self.onPaymentsTap = onPaymentsTap
+        self.onSplitBillTap = onSplitBillTap
+        self.onChargebackTap = onChargebackTap
     }
 
     func load() async {
@@ -307,7 +313,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                     amount: "\(sign)\(HomeAmountFormatter.format(tx.amount, currency: tx.currency))",
                     isCredit: tx.isCredit,
                     iconURL: tx.iconURL,
-                    iconColorHex: tx.iconColorHex
+                    iconColorHex: tx.iconColorHex,
+                    swipeActions: makeSwipeActions(for: tx)
                 )
             },
             onSearchChange: { [weak self] text in
@@ -318,6 +325,56 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 self?.panelDateFilter = filter
                 self?.rebuildPanel()
             }
+        )
+    }
+
+    private func makeSwipeActions(for transaction: HomeCardTransaction) -> [RBHomeFlowPanelSwipeAction] {
+        var actions: [RBHomeFlowPanelSwipeAction] = []
+        let payload = patchedActionPayload(for: transaction)
+
+        if transaction.enableForSplit {
+            actions.append(
+                RBHomeFlowPanelSwipeAction(id: "\(transaction.localDate.timeIntervalSince1970)-split", kind: .splitBill) { [onSplitBillTap] in
+                    onSplitBillTap(payload)
+                }
+            )
+        }
+
+        if transaction.enableForChargeback {
+            actions.append(
+                RBHomeFlowPanelSwipeAction(id: "\(transaction.localDate.timeIntervalSince1970)-chargeback", kind: .chargeback) { [onChargebackTap] in
+                    onChargebackTap(payload)
+                }
+            )
+        }
+
+        return actions
+    }
+
+    private func patchedActionPayload(for transaction: HomeCardTransaction) -> HomeCardTransactionActionPayload {
+        let selectedCardIdn = selectedCard?.cardIdn
+        return HomeCardTransactionActionPayload(
+            localDate: transaction.actionPayload.localDate,
+            statementDescription: transaction.actionPayload.statementDescription,
+            descriptionExtended: transaction.actionPayload.descriptionExtended,
+            amount: transaction.actionPayload.amount,
+            currency: transaction.actionPayload.currency,
+            accountAmount: transaction.actionPayload.accountAmount,
+            accountCurrency: transaction.actionPayload.accountCurrency,
+            rrn: transaction.actionPayload.rrn,
+            srn: transaction.actionPayload.srn,
+            arn: transaction.actionPayload.arn,
+            country: transaction.actionPayload.country,
+            city: transaction.actionPayload.city,
+            mcc: transaction.actionPayload.mcc,
+            cardIdn: transaction.actionPayload.cardIdn ?? selectedCardIdn,
+            authCode: transaction.actionPayload.authCode,
+            transCondition: transaction.actionPayload.transCondition,
+            fee: transaction.actionPayload.fee,
+            feeCurrency: transaction.actionPayload.feeCurrency,
+            transactionStatus: transaction.actionPayload.transactionStatus,
+            rechargeOrderStatus: transaction.actionPayload.rechargeOrderStatus,
+            isChargebackEligible: transaction.actionPayload.isChargebackEligible
         )
     }
 

@@ -240,8 +240,19 @@ public struct RBHomeFlowPanelItem: Identifiable {
     public let isCredit: Bool
     public let iconURL: String?
     public let iconColorHex: String?
+    public let swipeActions: [RBHomeFlowPanelSwipeAction]
 
-    public init(id: String, date: String?, title: String, subtitle: String? = nil, amount: String, isCredit: Bool, iconURL: String? = nil, iconColorHex: String? = nil) {
+    public init(
+        id: String,
+        date: String?,
+        title: String,
+        subtitle: String? = nil,
+        amount: String,
+        isCredit: Bool,
+        iconURL: String? = nil,
+        iconColorHex: String? = nil,
+        swipeActions: [RBHomeFlowPanelSwipeAction] = []
+    ) {
         self.id = id
         self.date = date
         self.title = title
@@ -250,6 +261,24 @@ public struct RBHomeFlowPanelItem: Identifiable {
         self.isCredit = isCredit
         self.iconURL = iconURL
         self.iconColorHex = iconColorHex
+        self.swipeActions = swipeActions
+    }
+}
+
+public struct RBHomeFlowPanelSwipeAction: Identifiable {
+    public enum Kind {
+        case splitBill
+        case chargeback
+    }
+
+    public let id: String
+    public let kind: Kind
+    public let onTap: () -> Void
+
+    public init(id: String, kind: Kind, onTap: @escaping () -> Void) {
+        self.id = id
+        self.kind = kind
+        self.onTap = onTap
     }
 }
 

@@ -9,6 +9,9 @@ public struct HomeCardTransaction: Sendable {
     public let isCredit: Bool
     public let iconURL: String?
     public let iconColorHex: String?
+    public let enableForSplit: Bool
+    public let enableForChargeback: Bool
+    public let actionPayload: HomeCardTransactionActionPayload
 
     public init(
         localDate: Date,
@@ -18,7 +21,10 @@ public struct HomeCardTransaction: Sendable {
         currency: String,
         isCredit: Bool,
         iconURL: String? = nil,
-        iconColorHex: String? = nil
+        iconColorHex: String? = nil,
+        enableForSplit: Bool = false,
+        enableForChargeback: Bool = false,
+        actionPayload: HomeCardTransactionActionPayload
     ) {
         self.localDate = localDate
         self.title = title
@@ -28,5 +34,8 @@ public struct HomeCardTransaction: Sendable {
         self.isCredit = isCredit
         self.iconURL = iconURL
         self.iconColorHex = iconColorHex
+        self.enableForSplit = enableForSplit
+        self.enableForChargeback = enableForChargeback
+        self.actionPayload = actionPayload
     }
 }

@@ -68,15 +68,17 @@ struct RBHomeFlowTransactionsPanelContent: View {
                                 .padding(.bottom, 8)
                         }
 
-                        RBTransactionRow(model: .init(
-                            id: item.id,
-                            title: item.title,
-                            subtitle: item.subtitle,
-                            amount: isBalanceVisible ? item.amount : "••••",
-                            isCredit: item.isCredit,
-                            iconURL: item.iconURL,
-                            iconColorHex: item.iconColorHex
-                        ))
+                        RBHomeFlowSwipeableTransactionRow(actions: item.swipeActions) {
+                            RBTransactionRow(model: .init(
+                                id: item.id,
+                                title: item.title,
+                                subtitle: item.subtitle,
+                                amount: isBalanceVisible ? item.amount : "••••",
+                                isCredit: item.isCredit,
+                                iconURL: item.iconURL,
+                                iconColorHex: item.iconColorHex
+                            ))
+                        }
 
                         if index < model.items.count - 1 {
                             Divider()
