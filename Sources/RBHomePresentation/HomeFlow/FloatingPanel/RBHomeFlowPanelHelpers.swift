@@ -35,6 +35,8 @@ struct RBHomeFlowPanCoordinatedScrollView<Content: View>: View {
     let coordinateSpaceName: String
     let bottomInset: CGFloat
     let topTolerance: CGFloat
+    let collapseThreshold: CGFloat
+    let onPullDownAtTop: (() -> Void)?
     @ViewBuilder let content: () -> Content
 
     @State private var scrollOffset: CGFloat = 0
@@ -44,12 +46,16 @@ struct RBHomeFlowPanCoordinatedScrollView<Content: View>: View {
         coordinateSpaceName: String,
         bottomInset: CGFloat = 0,
         topTolerance: CGFloat = 1,
+        collapseThreshold: CGFloat = RBHomeFlowLayout.floatingPanelCollapseThreshold,
+        onPullDownAtTop: (() -> Void)? = nil,
         @ViewBuilder content: @escaping () -> Content
     ) {
         self.isExpanded = isExpanded
         self.coordinateSpaceName = coordinateSpaceName
         self.bottomInset = bottomInset
         self.topTolerance = topTolerance
+        self.collapseThreshold = collapseThreshold
+        self.onPullDownAtTop = onPullDownAtTop
         self.content = content
     }
 
@@ -75,5 +81,19 @@ struct RBHomeFlowPanCoordinatedScrollView<Content: View>: View {
         .rbDraggablePanelScrollAtTop(!isExpanded || isScrollAtTop)
         .modifier(RBScrollDisabledModifier(disabled: !isExpanded))
         .onPreferenceChange(PanelScrollOffsetKey.self) { scrollOffset = $0 }
+        .simultaneousGesture(contentToPanelHandoffGesture)
+    }
+
+    private var contentToPanelHandoffGesture: some Gesture {
+        DragGesture(minimumDistance: 8)
+            .onEnded { value in
+                guard isExpanded, isScrollAtTop else { return }
+                let dy = value.translation.height
+                let dx = value.translation.width
+                let predictedDY = value.predictedEndTranslation.height
+                guard dy > 0, dy > abs(dx) else { return }
+                guard dy > collapseThreshold || predictedDY > collapseThreshold * 1.5 else { return }
+                onPullDownAtTop?()
+            }
     }
 }

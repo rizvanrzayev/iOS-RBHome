@@ -15,6 +15,8 @@ struct RBHomeFlowFloatingPanel: View {
     let peekHeight: CGFloat
     let fullHeight: CGFloat
     let collapseID: AnyHashable
+    let expandID: AnyHashable
+    let externalDragOffset: CGFloat
     let isBalanceVisible: Bool
     let onExpandedChanged: (Bool) -> Void
 
@@ -28,10 +30,10 @@ struct RBHomeFlowFloatingPanel: View {
             peekHeight: peekHeight,
             fullHeight: fullHeight,
             collapseID: collapseID,
+            expandID: expandID,
             cornerRadius: RBHomeFlowLayout.floatingPanelCornerRadius,
-            collapseThreshold: RBHomeFlowLayout.floatingPanelCollapseThreshold,
-            expandThreshold: RBHomeFlowLayout.floatingPanelExpandThreshold,
             animation: RBHomeFlowPage.transitionAnimation,
+            externalDragOffset: externalDragOffset,
             onExpandedChanged: onExpandedChanged
         ) { isExpanded, collapse, expand in
             ZStack(alignment: .top) {

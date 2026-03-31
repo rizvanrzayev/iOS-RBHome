@@ -139,17 +139,56 @@ extension RBHomeFlowPage {
 
     // MARK: - Gesture
 
+    private func isPanelGesture(_ value: DragGesture.Value) -> Bool {
+        let panelTop = swipeContainerHeight - dynamicPeekHeight
+        guard value.startLocation.y >= panelTop else { return false }
+        let absV = abs(value.translation.height)
+        let absH = abs(value.translation.width)
+        return absV > absH
+    }
+
+    private func commitPanelState(translation: CGFloat, predicted: CGFloat) {
+        let net = translation
+        let vel = predicted - net
+        if isPanelExpanded {
+            guard panelScrollAtTop else { return }
+            if net > 80 || vel > 200 {
+                panelCollapseToken = UUID()
+            }
+        } else {
+            if -net > 80 || vel < -200 {
+                panelExpandToken = UUID()
+            }
+        }
+    }
+
     var swipeBackGesture: some Gesture {
         DragGesture(minimumDistance: 1)
             .updating($carouselDragOffset) { value, state, _ in
                 guard isCarouselGesture(value) else { return }
                 state = value.translation.width.isFinite ? value.translation.width : 0
             }
+            .updating($panelDragOffset) { value, state, _ in
+                guard isPanelGesture(value) else { return }
+                let t = value.translation.height
+                if isPanelExpanded {
+                    guard panelScrollAtTop else { return }
+                    state = max(0, t)
+                } else {
+                    state = min(0, t)
+                }
+            }
             .onEnded { value in
                 if isCarouselGesture(value) {
                     commitCarouselPage(
                         translation: value.translation.width,
                         predicted: value.predictedEndTranslation.width
+                    )
+                }
+                if isPanelGesture(value) {
+                    commitPanelState(
+                        translation: value.translation.height,
+                        predicted: value.predictedEndTranslation.height
                     )
                 }
                 guard visualMode == .detail else { return }

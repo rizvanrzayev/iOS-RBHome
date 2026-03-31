@@ -21,7 +21,8 @@ struct RBHomeFlowActionsPanelContent: View {
         case .loaded(let model):
             RBHomeFlowPanCoordinatedScrollView(
                 isExpanded: isExpanded,
-                coordinateSpaceName: "panelActionsScroll"
+                coordinateSpaceName: "panelActionsScroll",
+                onPullDownAtTop: collapse
             ) {
                 RBHomeFlowDetailActionListSectionView(model: .init(items: model.items))
                     .padding(.horizontal, 24)

@@ -39,6 +39,14 @@ public struct RBHomeFlowPage: View {
     @State var carouselStep: CGFloat = 1
     @State var carouselPageCommit: CarouselPageCommit? = nil
 
+    // Panel gesture coordination
+    @GestureState(
+        resetTransaction: Transaction(animation: RBHomeFlowPage.transitionAnimation)
+    ) var panelDragOffset: CGFloat = 0
+    @State var panelExpandToken: UUID = UUID()
+    @State var isPanelExpanded: Bool = false
+    @State var panelScrollAtTop: Bool = true
+
     public init(
         data: RBHomeFlowPageData,
         mode: RBHomeFlowMode,

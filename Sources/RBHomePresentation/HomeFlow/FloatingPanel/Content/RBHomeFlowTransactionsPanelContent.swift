@@ -36,7 +36,8 @@ struct RBHomeFlowTransactionsPanelContent: View {
         return AnyView(RBHomeFlowPanCoordinatedScrollView(
             isExpanded: isExpanded,
             coordinateSpaceName: "panelScroll",
-            bottomInset: 80
+            bottomInset: 80,
+            onPullDownAtTop: collapse
         ) {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if let segmentedControl = model.segmentedControl {

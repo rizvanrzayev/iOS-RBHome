@@ -30,8 +30,10 @@ extension RBHomeFlowPage {
                     peekHeight: dynamicPeekHeight,
                     fullHeight: fullHeight,
                     collapseID: AnyHashable(panelCollapseToken),
+                    expandID: AnyHashable(panelExpandToken),
+                    externalDragOffset: panelDragOffset,
                     isBalanceVisible: isBalanceVisible,
-                    onExpandedChanged: { _ in }
+                    onExpandedChanged: { isPanelExpanded = $0 }
                 )
                 .ignoresSafeArea(edges: .bottom)
             }
@@ -43,6 +45,7 @@ extension RBHomeFlowPage {
             }
             .onChange(of: proxy.size.width) { swipeContainerWidth = $0 }
             .onChange(of: proxy.size.height) { swipeContainerHeight = $0 }
+            .onPreferenceChange(RBDraggablePanelScrollAtTopKey.self) { panelScrollAtTop = $0 }
             .onPreferenceChange(RBHomeFlowContentBottomKey.self) { bottomY in
                 guard let bottomY else { return }
                 let newHeight = max(
