@@ -26,3 +26,54 @@ struct RBScrollDisabledModifier: ViewModifier {
         }
     }
 }
+
+/// Shared scroll ownership wrapper for Home floating-panel content.
+/// It disables inner scrolling while the panel is collapsed and reports
+/// the real top state back to `RBDraggablePanel` for drag handoff.
+struct RBHomeFlowPanCoordinatedScrollView<Content: View>: View {
+    let isExpanded: Bool
+    let coordinateSpaceName: String
+    let bottomInset: CGFloat
+    let topTolerance: CGFloat
+    @ViewBuilder let content: () -> Content
+
+    @State private var scrollOffset: CGFloat = 0
+
+    init(
+        isExpanded: Bool,
+        coordinateSpaceName: String,
+        bottomInset: CGFloat = 0,
+        topTolerance: CGFloat = 1,
+        @ViewBuilder content: @escaping () -> Content
+    ) {
+        self.isExpanded = isExpanded
+        self.coordinateSpaceName = coordinateSpaceName
+        self.bottomInset = bottomInset
+        self.topTolerance = topTolerance
+        self.content = content
+    }
+
+    private var isScrollAtTop: Bool {
+        scrollOffset >= -topTolerance
+    }
+
+    var body: some View {
+        ScrollView {
+            GeometryReader { geo in
+                Color.clear.preference(
+                    key: PanelScrollOffsetKey.self,
+                    value: geo.frame(in: .named(coordinateSpaceName)).minY
+                )
+            }
+            .frame(height: 0)
+
+            content()
+        }
+        .scrollIndicators(.hidden)
+        .safeAreaInset(edge: .bottom) { Color.clear.frame(height: bottomInset) }
+        .coordinateSpace(name: coordinateSpaceName)
+        .rbDraggablePanelScrollAtTop(!isExpanded || isScrollAtTop)
+        .modifier(RBScrollDisabledModifier(disabled: !isExpanded))
+        .onPreferenceChange(PanelScrollOffsetKey.self) { scrollOffset = $0 }
+    }
+}

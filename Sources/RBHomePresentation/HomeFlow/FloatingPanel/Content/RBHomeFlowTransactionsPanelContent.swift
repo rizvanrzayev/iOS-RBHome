@@ -33,13 +33,17 @@ struct RBHomeFlowTransactionsPanelContent: View {
     }
 
     private func loadedScrollView(model: RBHomeFlowPanelModel) -> some View {
-        return AnyView(ScrollView {
+        return AnyView(RBHomeFlowPanCoordinatedScrollView(
+            isExpanded: isExpanded,
+            coordinateSpaceName: "panelScroll",
+            bottomInset: 80
+        ) {
             LazyVStack(alignment: .leading, spacing: 0) {
                 if let segmentedControl = model.segmentedControl {
                     panelSegmentedControl(segmentedControl)
-                    .padding(.horizontal, 24)
-                    .padding(.top, 8)
-                    .padding(.bottom, model.items.isEmpty ? 0 : 8)
+                        .padding(.horizontal, 24)
+                        .padding(.top, 8)
+                        .padding(.bottom, model.items.isEmpty ? 0 : 8)
                 }
 
                 if model.items.isEmpty {
@@ -47,14 +51,6 @@ struct RBHomeFlowTransactionsPanelContent: View {
                         .frame(maxWidth: .infinity)
                         .padding(.top, 16)
                 } else {
-                    GeometryReader { geo in
-                        Color.clear.preference(
-                            key: PanelScrollOffsetKey.self,
-                            value: geo.frame(in: .named("panelScroll")).minY
-                        )
-                    }
-                    .frame(height: 0)
-
                     ForEach(Array(model.items.enumerated()), id: \.element.id) { index, item in
                         let showsDateHeader = item.date != nil &&
                             (index == 0 || item.date != model.items[index - 1].date)
@@ -87,17 +83,7 @@ struct RBHomeFlowTransactionsPanelContent: View {
                     }
                 }
             }
-        }
-        .scrollIndicators(.hidden)
-        .safeAreaInset(edge: .bottom) { Color.clear.frame(height: 80) }
-        .coordinateSpace(name: "panelScroll")
-        .onPreferenceChange(PanelScrollOffsetKey.self) { offset in
-            if isExpanded && offset > RBHomeFlowLayout.floatingPanelCollapseThreshold {
-                collapse()
-            }
-        }
-        .modifier(RBScrollDisabledModifier(disabled: !isExpanded))
-        )
+        })
     }
 
     @ViewBuilder
