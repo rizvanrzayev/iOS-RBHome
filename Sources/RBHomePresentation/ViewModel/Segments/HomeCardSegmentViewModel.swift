@@ -24,6 +24,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let setFavoriteCardUseCase: SetFavoriteCardUseCase
     private let onCardToCardTap: (Int) -> Void
     private let onTopupTap: (Int) -> Void
+    private let onCardApplePayTap: (Int, String, Int) -> Void
+    private let onCardDigitalSkinTap: (Int, String, Int) -> Void
+    private let onCardRemoveTap: (String) -> Void
     private let onBonusTap: (Int, String, String) -> Void
     private let onEDVTap: () -> Void
     private let onPaymentsTap: (String) -> Void
@@ -46,6 +49,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         setFavoriteCardUseCase: SetFavoriteCardUseCase,
         onCardToCardTap: @escaping (Int) -> Void = { _ in },
         onTopupTap: @escaping (Int) -> Void = { _ in },
+        onCardApplePayTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
+        onCardDigitalSkinTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
+        onCardRemoveTap: @escaping (String) -> Void = { _ in },
         onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
         onEDVTap: @escaping () -> Void = {},
         onPaymentsTap: @escaping (String) -> Void = { _ in },
@@ -65,6 +71,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.setFavoriteCardUseCase = setFavoriteCardUseCase
         self.onCardToCardTap = onCardToCardTap
         self.onTopupTap = onTopupTap
+        self.onCardApplePayTap = onCardApplePayTap
+        self.onCardDigitalSkinTap = onCardDigitalSkinTap
+        self.onCardRemoveTap = onCardRemoveTap
         self.onBonusTap = onBonusTap
         self.onEDVTap = onEDVTap
         self.onPaymentsTap = onPaymentsTap
@@ -295,6 +304,21 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onCardDocumentsTap()
     }
 
+    private func handleCardApplePayTap() {
+        guard let card = selectedCard, card.cardType != .stored else { return }
+        onCardApplePayTap(card.cardIdn, card.maskedPan, cardDetectionTypeRaw(for: card))
+    }
+
+    private func handleCardDigitalSkinTap() {
+        guard let card = selectedCard, card.cardType != .stored else { return }
+        onCardDigitalSkinTap(card.cardIdn, card.maskedPan, cardDetectionTypeRaw(for: card))
+    }
+
+    private func handleCardRemoveTap() {
+        guard let card = selectedCard, card.cardType == .stored, let token = card.token, token.isEmpty == false else { return }
+        onCardRemoveTap(token)
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from cards: [HomeCard]) -> RBHomeFlowCarouselModel {
@@ -330,6 +354,16 @@ package final class HomeCardSegmentViewModel: ObservableObject {
             return "Faiz: \(HomeAmountFormatter.format(interest, currency: currency))"
         }
         return nil
+    }
+
+    private func cardDetectionTypeRaw(for card: HomeCard) -> Int {
+        switch card.cardNetwork {
+        case .maestro: return 0
+        case .mastercard: return 1
+        case .visa: return 2
+        case .discover: return 4
+        case .none: return 5
+        }
     }
 
     private func makeBonusSection(from bonus: HomeCardBonusPoint) -> RBHomeFlowCardBonusSection {
@@ -583,71 +617,48 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
         if selectedCard.cardType == .stored {
             return RBHomeFlowQuickActionsModel(items: [
-                .init(
-                    id: "dqa-payment",
-                    title: "Ödənişlər",
-                    icon: .custom(.actionQuickPayment),
-                    onTap: { [weak self, onPaymentsTap] in
-                        onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
-                    }
-                )
+                .init(id: "dqa-remove", title: "Kartı sil", icon: .asset("remove_card_icon", bundle: .module), iconSize: .custom(40), onTap: { [weak self] in
+                    self?.handleCardRemoveTap()
+                })
             ])
         }
 
-        if selectedCard.installmentCard {
-            return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "dqa-installment", title: "Taksit", icon: .custom(.actionQuickTransfer), onTap: { [weak self] in
-                    self?.handleInstallmentStatementTap()
-                }),
-                .init(id: "dqa-pay-loan", title: "Kredit ödə", icon: .custom(.actionQuickTopup), onTap: { [weak self] in
-                    self?.handleCreditCardPaymentTap()
-                }),
-                .init(
-                    id: "dqa-payment",
-                    title: "Ödənişlər",
-                    icon: .custom(.actionQuickPayment),
-                    onTap: { [weak self, onPaymentsTap] in
-                        onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
-                    }
-                )
-            ])
+        var items: [RBHomeFlowQuickActionItem] = []
+
+        if selectedCard.isLocked == false {
+            items.append(
+                .init(id: "dqa-apple-pay", title: "Apple Pay", icon: .asset("apple_pay_icon", bundle: .module), iconSize: .custom(40), onTap: { [weak self] in
+                    self?.handleCardApplePayTap()
+                })
+            )
+            items.append(
+                .init(id: "dqa-digital-skin", title: "Digital Skin", icon: .asset("digital_skin_icon", bundle: .module), iconSize: .custom(40), onTap: { [weak self] in
+                    self?.handleCardDigitalSkinTap()
+                })
+            )
         }
 
-        if selectedCard.cardType == .credit {
-            return RBHomeFlowQuickActionsModel(items: [
-                .init(id: "dqa-transfer", title: "Karta Köçürmə", icon: .custom(.actionQuickTransfer), onTap: { [weak self] in
-                    self?.handleCardToCardTap()
-                }),
-                .init(id: "dqa-pay-loan", title: "Kredit ödə", icon: .custom(.actionQuickTopup), onTap: { [weak self] in
-                    self?.handleCreditCardPaymentTap()
-                }),
-                .init(
-                    id: "dqa-payment",
-                    title: "Ödənişlər",
-                    icon: .custom(.actionQuickPayment),
-                    onTap: { [weak self, onPaymentsTap] in
-                        onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
-                    }
-                )
-            ])
-        }
-
-        return RBHomeFlowQuickActionsModel(items: [
-            .init(id: "dqa-transfer", title: "Karta Köçürmə", icon: .custom(.actionQuickTransfer), onTap: { [weak self] in
-                self?.handleCardToCardTap()
-            }),
-            .init(id: "dqa-deposit", title: "Mədaxil", icon: .custom(.actionQuickTopup), onTap: { [weak self] in
-                self?.handleTopupTap()
-            }),
+        items.append(
             .init(
-                id: "dqa-payment",
-                title: "Ödənişlər",
-                icon: .custom(.actionQuickPayment),
-                onTap: { [weak self, onPaymentsTap] in
-                    onPaymentsTap(self?.paymentSource(for: self?.selectedCard) ?? "")
+                id: selectedCard.isLocked ? "dqa-unblock" : "dqa-block",
+                title: selectedCard.isLocked ? "Bloku aç" : "Kartı blokla",
+                icon: .asset(selectedCard.isLocked ? "card_unblock_icon" : "card_block_icon", bundle: .module),
+                iconSize: .custom(40),
+                onTap: { [weak self] in
+                    self?.handleCardBlockToggleTap()
                 }
             )
-        ])
+        )
+
+        if selectedCard.installmentCard, selectedCard.isLocked == false {
+            items.append(
+                .init(id: "dqa-card-to-card", title: "Karta köçürmə", icon: .asset("quickActionToCard", bundle: .module), iconSize: .custom(36), onTap: { [weak self] in
+                    self?.handleCardToCardTap()
+                })
+            )
+        }
+
+        return RBHomeFlowQuickActionsModel(items: items)
     }
 
     private var cardServiceActions: RBHomeFlowDetailActionsModel {

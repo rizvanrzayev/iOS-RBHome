@@ -125,12 +125,14 @@ public struct RBHomeFlowQuickActionItem: Identifiable {
     public let id: String
     public let title: String
     public let icon: RBIcon
+    public let iconSize: RBIcon.Size?
     public let onTap: () -> Void
 
-    public init(id: String, title: String, icon: RBIcon, onTap: @escaping () -> Void) {
+    public init(id: String, title: String, icon: RBIcon, iconSize: RBIcon.Size? = nil, onTap: @escaping () -> Void) {
         self.id = id
         self.title = title
         self.icon = icon
+        self.iconSize = iconSize
         self.onTap = onTap
     }
 }

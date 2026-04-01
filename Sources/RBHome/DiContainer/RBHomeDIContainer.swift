@@ -12,6 +12,9 @@ public final class RBHomeDIContainer {
         public let apiService: APIService
         public let onCardToCardTap: (Int) -> Void
         public let onTopupTap: (Int) -> Void
+        public let onCardApplePayTap: (Int, String, Int) -> Void
+        public let onCardDigitalSkinTap: (Int, String, Int) -> Void
+        public let onCardRemoveTap: (String) -> Void
         public let onBonusTap: (Int, String, String) -> Void
         public let onEDVTap: () -> Void
         public let onPaymentsTap: (String) -> Void
@@ -42,6 +45,9 @@ public final class RBHomeDIContainer {
             apiService: APIService,
             onCardToCardTap: @escaping (Int) -> Void = { _ in },
             onTopupTap: @escaping (Int) -> Void = { _ in },
+            onCardApplePayTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
+            onCardDigitalSkinTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
+            onCardRemoveTap: @escaping (String) -> Void = { _ in },
             onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
             onEDVTap: @escaping () -> Void = {},
             onPaymentsTap: @escaping (String) -> Void = { _ in },
@@ -71,6 +77,9 @@ public final class RBHomeDIContainer {
             self.apiService = apiService
             self.onCardToCardTap = onCardToCardTap
             self.onTopupTap = onTopupTap
+            self.onCardApplePayTap = onCardApplePayTap
+            self.onCardDigitalSkinTap = onCardDigitalSkinTap
+            self.onCardRemoveTap = onCardRemoveTap
             self.onBonusTap = onBonusTap
             self.onEDVTap = onEDVTap
             self.onPaymentsTap = onPaymentsTap
@@ -185,6 +194,9 @@ public final class RBHomeDIContainer {
             setFavoriteCardUseCase: makeSetFavoriteCardUseCase(),
             onCardToCardTap: dependencies.onCardToCardTap,
             onTopupTap: dependencies.onTopupTap,
+            onCardApplePayTap: dependencies.onCardApplePayTap,
+            onCardDigitalSkinTap: dependencies.onCardDigitalSkinTap,
+            onCardRemoveTap: dependencies.onCardRemoveTap,
             onBonusTap: dependencies.onBonusTap,
             onEDVTap: dependencies.onEDVTap,
             onPaymentsTap: dependencies.onPaymentsTap,

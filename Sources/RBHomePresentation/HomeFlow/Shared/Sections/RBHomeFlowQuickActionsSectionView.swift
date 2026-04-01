@@ -26,7 +26,7 @@ struct RBHomeFlowQuickActionsSectionView: View {
                         title: item.title,
                         style: .primary,
                         buttonSize: 52,
-                        iconSize: .medium,
+                        iconSize: item.iconSize ?? .medium,
                         action: item.onTap
                     )
                     .frame(maxWidth: .infinity)
