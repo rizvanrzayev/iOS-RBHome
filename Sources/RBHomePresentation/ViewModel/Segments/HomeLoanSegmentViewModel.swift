@@ -31,6 +31,8 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
     private let onMortgageLoanPaymentTap: (String, String) -> Void
     private let onLoanOrderTap: () -> Void
     private let onLoanRequestTap: () -> Void
+    private let onEarlyLoanPaymentTap: (String) -> Void
+    private let onLoanScheduleTap: (String) -> Void
 
     package init(
         fetchLoansUseCase: FetchLoansUseCase,
@@ -38,7 +40,9 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         onLoanPaymentTap: @escaping (String) -> Void = { _ in },
         onMortgageLoanPaymentTap: @escaping (String, String) -> Void = { _, _ in },
         onLoanOrderTap: @escaping () -> Void = {},
-        onLoanRequestTap: @escaping () -> Void = {}
+        onLoanRequestTap: @escaping () -> Void = {},
+        onEarlyLoanPaymentTap: @escaping (String) -> Void = { _ in },
+        onLoanScheduleTap: @escaping (String) -> Void = { _ in }
     ) {
         self.fetchLoansUseCase = fetchLoansUseCase
         self.fetchScheduleUseCase = fetchScheduleUseCase
@@ -46,6 +50,8 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         self.onMortgageLoanPaymentTap = onMortgageLoanPaymentTap
         self.onLoanOrderTap = onLoanOrderTap
         self.onLoanRequestTap = onLoanRequestTap
+        self.onEarlyLoanPaymentTap = onEarlyLoanPaymentTap
+        self.onLoanScheduleTap = onLoanScheduleTap
     }
 
     func load() async {
@@ -158,6 +164,16 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
         }
     }
 
+    private func handleEarlyLoanPaymentTap() {
+        guard let selectedLoan else { return }
+        onEarlyLoanPaymentTap(selectedLoan.contractNumber)
+    }
+
+    private func handleLoanScheduleTap() {
+        guard let selectedLoan else { return }
+        onLoanScheduleTap(selectedLoan.contractNumber)
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from loans: [HomeLoan]) -> RBHomeFlowCarouselModel {
@@ -166,7 +182,10 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
                 id: loan.contractNumber,
                 title: loan.accountName,
                 subtitle: "Qalıq borc",
-                amount: HomeAmountFormatter.format(loan.amount, currency: loan.currency)
+                amount: HomeAmountFormatter.format(loan.amount, currency: loan.currency),
+                detailCaption: loan.isMortgage ? "İpoteka" : "Kredit",
+                detailInfoTitle: "Müqavilə №",
+                detailInfoValue: loan.contractNumber
             )
         })
     }
@@ -252,13 +271,11 @@ package final class HomeLoanSegmentViewModel: ObservableObject {
     private var loanServiceActions: RBHomeFlowDetailActionsModel {
         RBHomeFlowDetailActionsModel(title: "Kredit xidmətləri", items: [
             .init(id: "svc-early", title: "Erkən ödəmə",
-                  description: "Krediti müddətdən əvvəl ödə", systemImage: "checkmark.circle.fill", onTap: {}),
+                  description: "Krediti müddətdən əvvəl ödə", systemImage: "checkmark.circle.fill",
+                  onTap: { [weak self] in self?.handleEarlyLoanPaymentTap() }),
             .init(id: "svc-schedule", title: "Ödəniş qrafiki",
-                  description: "Tam ödəniş cədvəlini gör", systemImage: "calendar", onTap: {}),
-            .init(id: "svc-refinance", title: "Yenidən maliyyələşdirmə",
-                  description: "Daha əlverişli şərtlərə keç", systemImage: "arrow.2.circlepath", onTap: {}),
-            .init(id: "svc-contract", title: "Müqavilə",
-                  description: "Kredit müqaviləsini yüklə", systemImage: "doc.text.fill", onTap: {})
+                  description: "Tam ödəniş cədvəlini gör", systemImage: "calendar",
+                  onTap: { [weak self] in self?.handleLoanScheduleTap() })
         ])
     }
 }

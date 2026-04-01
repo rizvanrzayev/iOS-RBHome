@@ -31,6 +31,8 @@ public final class RBHomeDIContainer {
         public let onMortgageLoanPaymentTap: (String, String) -> Void
         public let onLoanOrderTap: () -> Void
         public let onLoanRequestTap: () -> Void
+        public let onEarlyLoanPaymentTap: (String) -> Void
+        public let onLoanScheduleTap: (String) -> Void
         public let onSignIBContract: () -> Void
         public let onSetSecretWord: () -> Void
         public let onLogout: () -> Void
@@ -59,6 +61,8 @@ public final class RBHomeDIContainer {
             onMortgageLoanPaymentTap: @escaping (String, String) -> Void = { _, _ in },
             onLoanOrderTap: @escaping () -> Void = {},
             onLoanRequestTap: @escaping () -> Void = {},
+            onEarlyLoanPaymentTap: @escaping (String) -> Void = { _ in },
+            onLoanScheduleTap: @escaping (String) -> Void = { _ in },
             onSignIBContract: @escaping () -> Void = {},
             onSetSecretWord: @escaping () -> Void = {},
             onLogout: @escaping () -> Void = {},
@@ -86,6 +90,8 @@ public final class RBHomeDIContainer {
             self.onMortgageLoanPaymentTap = onMortgageLoanPaymentTap
             self.onLoanOrderTap = onLoanOrderTap
             self.onLoanRequestTap = onLoanRequestTap
+            self.onEarlyLoanPaymentTap = onEarlyLoanPaymentTap
+            self.onLoanScheduleTap = onLoanScheduleTap
             self.onSignIBContract = onSignIBContract
             self.onSetSecretWord = onSetSecretWord
             self.onLogout = onLogout
@@ -214,7 +220,9 @@ public final class RBHomeDIContainer {
             onLoanPaymentTap: dependencies.onLoanPaymentTap,
             onMortgageLoanPaymentTap: dependencies.onMortgageLoanPaymentTap,
             onLoanOrderTap: dependencies.onLoanOrderTap,
-            onLoanRequestTap: dependencies.onLoanRequestTap
+            onLoanRequestTap: dependencies.onLoanRequestTap,
+            onEarlyLoanPaymentTap: dependencies.onEarlyLoanPaymentTap,
+            onLoanScheduleTap: dependencies.onLoanScheduleTap
         )
     }
 
