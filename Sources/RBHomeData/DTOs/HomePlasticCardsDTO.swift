@@ -50,6 +50,7 @@ struct HomePlasticCardDTO: Decodable {
     let cardType: String?
     let status: Int?
     let isFavorite: Bool?
+    let favoritePlasticCard: Bool?
     let hasCashbackRule: Bool?
     let cardDetectionType: Int?
     let interestAmount: Double?
@@ -67,6 +68,7 @@ struct HomePlasticCardDTO: Decodable {
         case cardType = "CardType"
         case status = "Status"
         case isFavorite = "IsFavorite"
+        case favoritePlasticCard = "FavoritePlasticCard"
         case hasCashbackRule = "HasCashbackRule"
         case cardDetectionType = "CardDetectionType"
         case interestAmount = "InterestAmount"
@@ -102,7 +104,7 @@ struct HomePlasticCardDTO: Decodable {
             cardType: type,
             cardNetwork: network,
             isLocked: status == 3,
-            isFavorite: isFavorite ?? false,
+            isFavorite: favoritePlasticCard ?? isFavorite ?? false,
             hasCashbackRule: hasCashbackRule ?? false,
             interestAmount: interestAmount,
             minimumPayment: minimumPayment,

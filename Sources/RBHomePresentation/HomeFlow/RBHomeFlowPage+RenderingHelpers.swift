@@ -92,7 +92,14 @@ extension RBHomeFlowPage {
                         title: item.title,
                         maskedNumber: .init(item.subtitle),
                         brandImageName: item.networkAsset,
-                        trailingIcons: .init(showsEye: true, isEyeOpen: isBalanceVisible, showsFavorite: true, isFavorite: item.isFavorite),
+                        trailingIcons: .init(
+                            showsEye: true,
+                            isEyeOpen: isBalanceVisible,
+                            showsFavorite: true,
+                            isFavorite: item.isFavorite,
+                            legacyEyeAssetName: isBalanceVisible ? "show" : "hide",
+                            legacyFavoriteAssetName: item.isFavorite ? "favorite" : "unfavorite"
+                        ),
                         bottomLeadingLabel: isBalanceVisible ? item.bottomLeadingLabel : item.bottomLeadingLabel.map { _ in "••••" }
                     ),
                     onTapEye: { isBalanceVisible.toggle() },

@@ -464,6 +464,31 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         )
     }
 
+    private func applyFavoriteSelection(cardIdn: Int) {
+        cards = cards.map { card in
+            guard card.cardType != .stored else { return card }
+            return HomeCard(
+                cardIdn: card.cardIdn,
+                token: card.token,
+                name: card.name,
+                maskedPan: card.maskedPan,
+                amount: card.amount,
+                currency: card.currency,
+                iban: card.iban,
+                cardType: card.cardType,
+                cardNetwork: card.cardNetwork,
+                isLocked: card.isLocked,
+                isFavorite: card.cardIdn == cardIdn,
+                hasCashbackRule: card.hasCashbackRule,
+                interestAmount: card.interestAmount,
+                minimumPayment: card.minimumPayment,
+                monthlyDebt: card.monthlyDebt,
+                installmentCard: card.installmentCard
+            )
+        }
+        rebuildCarousel()
+    }
+
     // MARK: - Favorite
 
     package func toggleFavorite(cardId: String) {
@@ -471,7 +496,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
               card.cardType != .stored else { return }
         Task {
             try? await setFavoriteCardUseCase.execute(cardIdn: card.cardIdn)
-            await load()
+            applyFavoriteSelection(cardIdn: card.cardIdn)
         }
     }
 

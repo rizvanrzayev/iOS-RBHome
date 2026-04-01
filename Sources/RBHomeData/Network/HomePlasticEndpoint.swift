@@ -16,7 +16,7 @@ enum HomePlasticEndpoint: EndpointInterface {
         case .listTransactions:  return "listDynamicStatement"
         case .listStoredTransactions: return "listCardStorageStatement"
         case .getBonusPoints:    return "kartmaneCurrentPoint"
-        case .setFavoriteCard:   return "saveFavoriteCard"
+        case .setFavoriteCard:   return "saveFavoriteCardIdn"
         }
     }
 
