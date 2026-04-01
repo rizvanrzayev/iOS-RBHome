@@ -44,9 +44,11 @@ struct HomePlasticCardDTO: Decodable {
     let cardIdn: Int?
     let name: String?
     let pan: String?
+    let cardNumber: String?
     let amount: Double?
     let currency: String?
     let iban: String?
+    let cardExp: String?
     let cardType: String?
     let status: Int?
     let isFavorite: Bool?
@@ -60,14 +62,17 @@ struct HomePlasticCardDTO: Decodable {
     let monthlyDebt: Double?
     let installmentCard: Bool?
     let isAdvanceLoan: Bool?
+    let isPremium: Bool?
 
     enum CodingKeys: String, CodingKey {
         case cardIdn = "CardIdn"
         case name = "Name"
         case pan = "Pan"
+        case cardNumber = "CardNumber"
         case amount = "Amount"
         case currency = "Currency"
         case iban = "Iban"
+        case cardExp = "CardExp"
         case cardType = "CardType"
         case status = "Status"
         case isFavorite = "IsFavorite"
@@ -81,6 +86,7 @@ struct HomePlasticCardDTO: Decodable {
         case monthlyDebt = "MonthlyDebt"
         case installmentCard = "InstallmentCard"
         case isAdvanceLoan = "IsAdvanceLoan"
+        case isPremium = "IsPremium"
     }
 
     func toEntity() -> HomeCard {
@@ -104,6 +110,8 @@ struct HomePlasticCardDTO: Decodable {
             cardIdn: cardIdn ?? 0,
             name: name ?? "",
             maskedPan: maskedPan,
+            encryptedPan: cardNumber,
+            expiryDate: cardExp,
             amount: amount ?? 0,
             currency: currency ?? "",
             iban: iban,
@@ -118,7 +126,9 @@ struct HomePlasticCardDTO: Decodable {
             installmentCard: installmentCard ?? false,
             isJunior: cardProduct == "KartmaneJunior",
             hasTurnover: hasTurnover ?? false,
-            isAdvanceLoan: isAdvanceLoan ?? false
+            isAdvanceLoan: isAdvanceLoan ?? false,
+            cardProductRaw: cardProduct,
+            isPremium: isPremium ?? false
         )
     }
 }

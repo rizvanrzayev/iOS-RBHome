@@ -73,6 +73,7 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     public let isFavorite: Bool
     public let isLocked: Bool
     public let detailBadgeText: String?
+    public let cardDetailContent: RBHomeFlowCardDetailContent?
 
     public init(
         id: String,
@@ -87,7 +88,8 @@ public struct RBHomeFlowCarouselItem: Identifiable {
         isStored: Bool = false,
         isFavorite: Bool = false,
         isLocked: Bool = false,
-        detailBadgeText: String? = nil
+        detailBadgeText: String? = nil,
+        cardDetailContent: RBHomeFlowCardDetailContent? = nil
     ) {
         self.id = id
         self.title = title
@@ -102,6 +104,47 @@ public struct RBHomeFlowCarouselItem: Identifiable {
         self.isFavorite = isFavorite
         self.isLocked = isLocked
         self.detailBadgeText = detailBadgeText
+        self.cardDetailContent = cardDetailContent
+    }
+}
+
+public struct RBHomeFlowCardDetailContent {
+    public let backgroundAssetName: String
+    public let networkAssetName: String?
+    public let cardName: String
+    public let amountText: String
+    public let panText: String
+    public let panCopyValue: String?
+    public let expiryText: String
+    public let bankLogoURL: String?
+    public let isRecharge: Bool
+    public let isLocked: Bool
+    public let onFetchCVV: ((@escaping (Result<String, Error>) -> Void) -> Void)?
+
+    public init(
+        backgroundAssetName: String,
+        networkAssetName: String?,
+        cardName: String,
+        amountText: String,
+        panText: String,
+        panCopyValue: String? = nil,
+        expiryText: String,
+        bankLogoURL: String? = nil,
+        isRecharge: Bool,
+        isLocked: Bool,
+        onFetchCVV: ((@escaping (Result<String, Error>) -> Void) -> Void)? = nil
+    ) {
+        self.backgroundAssetName = backgroundAssetName
+        self.networkAssetName = networkAssetName
+        self.cardName = cardName
+        self.amountText = amountText
+        self.panText = panText
+        self.panCopyValue = panCopyValue
+        self.expiryText = expiryText
+        self.bankLogoURL = bankLogoURL
+        self.isRecharge = isRecharge
+        self.isLocked = isLocked
+        self.onFetchCVV = onFetchCVV
     }
 }
 

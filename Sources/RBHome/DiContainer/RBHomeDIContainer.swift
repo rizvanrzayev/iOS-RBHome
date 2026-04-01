@@ -15,6 +15,8 @@ public final class RBHomeDIContainer {
         public let onCardApplePayTap: (Int, String, Int) -> Void
         public let onCardDigitalSkinTap: (Int, String, Int) -> Void
         public let onCardRemoveTap: (String) -> Void
+        public let onDecryptCardPAN: (String) -> String?
+        public let onFetchCardCVV: (Int, @escaping (Result<String, Error>) -> Void) -> Void
         public let onBonusTap: (Int, String, String) -> Void
         public let onEDVTap: () -> Void
         public let onPaymentsTap: (String) -> Void
@@ -49,6 +51,10 @@ public final class RBHomeDIContainer {
             onCardApplePayTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
             onCardDigitalSkinTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
             onCardRemoveTap: @escaping (String) -> Void = { _ in },
+            onDecryptCardPAN: @escaping (String) -> String? = { _ in nil },
+            onFetchCardCVV: @escaping (Int, @escaping (Result<String, Error>) -> Void) -> Void = { _, completion in
+                completion(.failure(NSError(domain: "RBHome", code: -1, userInfo: [NSLocalizedDescriptionKey: "CVV əldə olunmadı"])))
+            },
             onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
             onEDVTap: @escaping () -> Void = {},
             onPaymentsTap: @escaping (String) -> Void = { _ in },
@@ -82,6 +88,8 @@ public final class RBHomeDIContainer {
             self.onCardApplePayTap = onCardApplePayTap
             self.onCardDigitalSkinTap = onCardDigitalSkinTap
             self.onCardRemoveTap = onCardRemoveTap
+            self.onDecryptCardPAN = onDecryptCardPAN
+            self.onFetchCardCVV = onFetchCardCVV
             self.onBonusTap = onBonusTap
             self.onEDVTap = onEDVTap
             self.onPaymentsTap = onPaymentsTap
@@ -200,6 +208,8 @@ public final class RBHomeDIContainer {
             onCardApplePayTap: dependencies.onCardApplePayTap,
             onCardDigitalSkinTap: dependencies.onCardDigitalSkinTap,
             onCardRemoveTap: dependencies.onCardRemoveTap,
+            onDecryptCardPAN: dependencies.onDecryptCardPAN,
+            onFetchCardCVV: dependencies.onFetchCardCVV,
             onBonusTap: dependencies.onBonusTap,
             onEDVTap: dependencies.onEDVTap,
             onPaymentsTap: dependencies.onPaymentsTap,

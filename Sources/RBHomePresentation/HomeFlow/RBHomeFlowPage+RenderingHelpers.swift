@@ -43,7 +43,14 @@ extension RBHomeFlowPage {
                     },
                     content: { item in carouselCardContent(item: item, segment: segment) },
                     detailContent: { item in
-                        if segment == .account {
+                        if segment == .card, let cardDetailContent = item.cardDetailContent {
+                            return AnyView(
+                                RBHomeFlowCardCarouselDetailView(
+                                    content: cardDetailContent,
+                                    amountText: isBalanceVisible ? cardDetailContent.amountText : "••••"
+                                )
+                            )
+                        } else if segment == .account {
                             return AnyView(
                                 RBHomeFlowAccountCarouselDetailPanel(
                                     caption: item.detailCaption ?? item.title,

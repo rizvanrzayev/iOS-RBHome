@@ -19,6 +19,10 @@ public struct HomeCard: Sendable {
     public let token: String?
     public let name: String
     public let maskedPan: String
+    public let encryptedPan: String?
+    public let fullPan: String?
+    public let expiryDate: String?
+    public let bankLogoURL: String?
     public let amount: Double
     public let currency: String
     public let iban: String?
@@ -41,12 +45,19 @@ public struct HomeCard: Sendable {
     public let hasTurnover: Bool
     /// True when card opens advance-loan flow instead of credit detail.
     public let isAdvanceLoan: Bool
+    /// Raw product identifier from backend. Used only for presentation parity mapping.
+    public let cardProductRaw: String?
+    public let isPremium: Bool
 
     public init(
         cardIdn: Int,
         token: String? = nil,
         name: String,
         maskedPan: String,
+        encryptedPan: String? = nil,
+        fullPan: String? = nil,
+        expiryDate: String? = nil,
+        bankLogoURL: String? = nil,
         amount: Double,
         currency: String,
         iban: String?,
@@ -61,12 +72,18 @@ public struct HomeCard: Sendable {
         installmentCard: Bool = false,
         isJunior: Bool = false,
         hasTurnover: Bool = false,
-        isAdvanceLoan: Bool = false
+        isAdvanceLoan: Bool = false,
+        cardProductRaw: String? = nil,
+        isPremium: Bool = false
     ) {
         self.cardIdn = cardIdn
         self.token = token
         self.name = name
         self.maskedPan = maskedPan
+        self.encryptedPan = encryptedPan
+        self.fullPan = fullPan
+        self.expiryDate = expiryDate
+        self.bankLogoURL = bankLogoURL
         self.amount = amount
         self.currency = currency
         self.iban = iban
@@ -82,5 +99,7 @@ public struct HomeCard: Sendable {
         self.isJunior = isJunior
         self.hasTurnover = hasTurnover
         self.isAdvanceLoan = isAdvanceLoan
+        self.cardProductRaw = cardProductRaw
+        self.isPremium = isPremium
     }
 }

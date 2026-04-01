@@ -27,6 +27,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let onCardApplePayTap: (Int, String, Int) -> Void
     private let onCardDigitalSkinTap: (Int, String, Int) -> Void
     private let onCardRemoveTap: (String) -> Void
+    private let onDecryptCardPAN: (String) -> String?
+    private let onFetchCardCVV: (Int, @escaping (Result<String, Error>) -> Void) -> Void
     private let onBonusTap: (Int, String, String) -> Void
     private let onEDVTap: () -> Void
     private let onPaymentsTap: (String) -> Void
@@ -53,6 +55,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onCardApplePayTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
         onCardDigitalSkinTap: @escaping (Int, String, Int) -> Void = { _, _, _ in },
         onCardRemoveTap: @escaping (String) -> Void = { _ in },
+        onDecryptCardPAN: @escaping (String) -> String? = { _ in nil },
+        onFetchCardCVV: @escaping (Int, @escaping (Result<String, Error>) -> Void) -> Void = { _, completion in
+            completion(.failure(NSError(domain: "RBHome", code: -1, userInfo: [NSLocalizedDescriptionKey: "CVV əldə olunmadı"])))
+        },
         onBonusTap: @escaping (Int, String, String) -> Void = { _, _, _ in },
         onEDVTap: @escaping () -> Void = {},
         onPaymentsTap: @escaping (String) -> Void = { _ in },
@@ -76,6 +82,8 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.onCardApplePayTap = onCardApplePayTap
         self.onCardDigitalSkinTap = onCardDigitalSkinTap
         self.onCardRemoveTap = onCardRemoveTap
+        self.onDecryptCardPAN = onDecryptCardPAN
+        self.onFetchCardCVV = onFetchCardCVV
         self.onBonusTap = onBonusTap
         self.onEDVTap = onEDVTap
         self.onPaymentsTap = onPaymentsTap
@@ -362,9 +370,35 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 isStored: card.cardType == .stored,
                 isFavorite: card.isFavorite,
                 isLocked: card.isLocked,
-                detailBadgeText: bottomLeadingLabel
+                detailBadgeText: bottomLeadingLabel,
+                cardDetailContent: makeCardDetailContent(for: card, amount: amount)
             )
         })
+    }
+
+    private func makeCardDetailContent(for card: HomeCard, amount: String) -> RBHomeFlowCardDetailContent {
+        let panValue = resolvedFullPAN(for: card) ?? card.maskedPan
+        let expiryText = formattedExpiry(card.expiryDate)
+
+        return RBHomeFlowCardDetailContent(
+            backgroundAssetName: detailBackgroundAssetName(for: card),
+            networkAssetName: detailNetworkAssetName(for: card),
+            cardName: card.name,
+            amountText: amount,
+            panText: panValue,
+            panCopyValue: panValue.isEmpty ? nil : panValue,
+            expiryText: expiryText,
+            bankLogoURL: nonEmptyString(card.bankLogoURL),
+            isRecharge: card.cardType == .stored,
+            isLocked: card.isLocked,
+            onFetchCVV: card.cardType == .stored ? nil : { [weak self] completion in
+                guard let self else {
+                    completion(.failure(NSError(domain: "RBHome", code: -1, userInfo: [NSLocalizedDescriptionKey: "CVV əldə olunmadı"])))
+                    return
+                }
+                self.onFetchCardCVV(card.cardIdn, completion)
+            }
+        )
     }
 
     private func cardLabel(for card: HomeCard) -> String? {
@@ -390,6 +424,67 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         case .discover: return 4
         case .none: return 5
         }
+    }
+
+    private func detailBackgroundAssetName(for card: HomeCard) -> String {
+        guard card.cardType != .stored else { return "otherBankCard" }
+
+        switch card.cardProductRaw {
+        case "GamerCard":
+            return "gamerCard"
+        case "KartmaneJunior":
+            return card.isPremium ? "junior-premium-bg" : "junior-bg"
+        default:
+            return card.isPremium ? "premiumCard" : "defaultCard"
+        }
+    }
+
+    private func detailNetworkAssetName(for card: HomeCard) -> String? {
+        switch card.cardNetwork {
+        case .maestro:
+            return "maestro"
+        case .mastercard:
+            return "mastercard"
+        case .visa:
+            return "visaWhite"
+        case .discover:
+            return "discoverCard"
+        case .none:
+            return nil
+        }
+    }
+
+    private func formattedExpiry(_ rawValue: String?) -> String {
+        guard let rawValue, rawValue.isEmpty == false else { return "" }
+
+        let formatter = DateFormatter()
+        formatter.locale = Locale(identifier: "en_US_POSIX")
+        formatter.dateFormat = "yyyy-MM-dd'T'HH:mm:ss"
+
+        guard let date = formatter.date(from: rawValue) else { return rawValue }
+        formatter.dateFormat = "MM/yy"
+        return formatter.string(from: date)
+    }
+
+    private func resolvedFullPAN(for card: HomeCard) -> String? {
+        if let fullPan = nonEmptyString(card.fullPan) {
+            return formattedPAN(fullPan)
+        }
+
+        guard let encryptedPan = nonEmptyString(card.encryptedPan) else { return nil }
+        return onDecryptCardPAN(encryptedPan)
+    }
+
+    private func formattedPAN(_ value: String) -> String {
+        value
+            .replacingOccurrences(of: " ", with: "")
+            .chunked(into: 4)
+            .joined(separator: " ")
+    }
+
+    private func nonEmptyString(_ value: String?) -> String? {
+        guard let value, value.isEmpty == false else { return nil }
+        return value
     }
 
     private func makeBonusSection(from bonus: HomeCardBonusPoint) -> RBHomeFlowCardBonusSection {
@@ -532,6 +627,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 token: card.token,
                 name: card.name,
                 maskedPan: card.maskedPan,
+                encryptedPan: card.encryptedPan,
+                fullPan: card.fullPan,
+                expiryDate: card.expiryDate,
+                bankLogoURL: card.bankLogoURL,
                 amount: card.amount,
                 currency: card.currency,
                 iban: card.iban,
@@ -546,7 +645,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 installmentCard: card.installmentCard,
                 isJunior: card.isJunior,
                 hasTurnover: card.hasTurnover,
-                isAdvanceLoan: card.isAdvanceLoan
+                isAdvanceLoan: card.isAdvanceLoan,
+                cardProductRaw: card.cardProductRaw,
+                isPremium: card.isPremium
             )
         }
         rebuildCarousel()
