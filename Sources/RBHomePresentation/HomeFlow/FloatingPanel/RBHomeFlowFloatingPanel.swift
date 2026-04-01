@@ -25,6 +25,10 @@ struct RBHomeFlowFloatingPanel: View {
         return false
     }
 
+    private var panelBackgroundColor: Color {
+        isActionsPanel ? Color.rb.backgroundSecondary : .white
+    }
+
     var body: some View {
         RBDraggablePanel(
             peekHeight: peekHeight,
@@ -32,6 +36,7 @@ struct RBHomeFlowFloatingPanel: View {
             collapseID: collapseID,
             expandID: expandID,
             cornerRadius: RBHomeFlowLayout.floatingPanelCornerRadius,
+            backgroundColor: panelBackgroundColor,
             animation: RBHomeFlowPage.transitionAnimation,
             externalDragOffset: externalDragOffset,
             onExpandedChanged: onExpandedChanged

@@ -19,17 +19,60 @@ struct RBHomeFlowDetailActionListSectionView: View {
                     .foregroundStyle(Color.rb.textPrimary)
             }
 
-            VStack(spacing: RBHomeFlowLayout.iconTextSpacing) {
+            VStack(spacing: 8) {
                 ForEach(model.items) { item in
-                    RBActionRow(model: .init(
-                        id: item.id,
-                        icon: item.icon,
-                        title: item.title,
-                        description: item.description,
-                        onTap: item.onTap
-                    ))
+                    RBHomeFlowLegacyDetailActionRow(item: item)
                 }
             }
         }
+    }
+}
+
+private struct RBHomeFlowLegacyDetailActionRow: View {
+    let item: RBHomeFlowDetailActionItem
+
+    var body: some View {
+        Button(action: item.onTap) {
+            HStack(spacing: 20) {
+                RoundedRectangle(cornerRadius: 12, style: .continuous)
+                    .fill(Color.rb.backgroundSecondary)
+                    .frame(width: 44, height: 44)
+                    .overlay {
+                        if let legacyIconAssetName = item.legacyIconAssetName {
+                            Image(legacyIconAssetName)
+                                .renderingMode(.template)
+                                .resizable()
+                                .scaledToFit()
+                                .frame(width: 20, height: 20)
+                                .foregroundStyle(Color.rb.textPrimary)
+                        } else {
+                            item.icon.view(size: .small, color: .rb.textPrimary)
+                        }
+                    }
+
+                VStack(alignment: .leading, spacing: 4) {
+                    Text(item.title)
+                        .font(.rb.body14(weight: .medium))
+                        .foregroundStyle(Color.rb.textPrimary)
+                        .multilineTextAlignment(.leading)
+
+                    Text(item.description)
+                        .font(.rb.caption())
+                        .foregroundStyle(Color.rb.textSecondary)
+                        .multilineTextAlignment(.leading)
+                }
+
+                Spacer(minLength: 0)
+
+                Image(systemName: "chevron.right")
+                    .font(.system(size: 12, weight: .semibold))
+                    .foregroundStyle(Color.rb.textSecondary)
+            }
+            .frame(maxWidth: .infinity, minHeight: 56, alignment: .leading)
+            .padding(.horizontal, 16)
+            .background(Color.rb.backgroundSecondary)
+            .clipShape(RoundedRectangle(cornerRadius: 16, style: .continuous))
+        }
+        .buttonStyle(.plain)
     }
 }

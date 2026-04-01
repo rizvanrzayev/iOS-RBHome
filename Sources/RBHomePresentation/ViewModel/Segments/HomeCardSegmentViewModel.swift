@@ -29,6 +29,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let onPaymentsTap: (String) -> Void
     private let onCreditCardPaymentTap: (String) -> Void
     private let onInstallmentStatementTap: (Int) -> Void
+    private let onCardBlockToggleTap: (Int, Bool) -> Void
+    private let onCardLimitManagementTap: (Int, String) -> Void
+    private let onCardRequisitesTap: (String, String) -> Void
+    private let onCardDocumentsTap: () -> Void
     private let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
     private let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
 
@@ -47,6 +51,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onPaymentsTap: @escaping (String) -> Void = { _ in },
         onCreditCardPaymentTap: @escaping (String) -> Void = { _ in },
         onInstallmentStatementTap: @escaping (Int) -> Void = { _ in },
+        onCardBlockToggleTap: @escaping (Int, Bool) -> Void = { _, _ in },
+        onCardLimitManagementTap: @escaping (Int, String) -> Void = { _, _ in },
+        onCardRequisitesTap: @escaping (String, String) -> Void = { _, _ in },
+        onCardDocumentsTap: @escaping () -> Void = {},
         onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
         onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in }
     ) {
@@ -62,6 +70,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.onPaymentsTap = onPaymentsTap
         self.onCreditCardPaymentTap = onCreditCardPaymentTap
         self.onInstallmentStatementTap = onInstallmentStatementTap
+        self.onCardBlockToggleTap = onCardBlockToggleTap
+        self.onCardLimitManagementTap = onCardLimitManagementTap
+        self.onCardRequisitesTap = onCardRequisitesTap
+        self.onCardDocumentsTap = onCardDocumentsTap
         self.onSplitBillTap = onSplitBillTap
         self.onChargebackTap = onChargebackTap
     }
@@ -263,6 +275,26 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onEDVTap()
     }
 
+    private func handleCardBlockToggleTap() {
+        guard let card = selectedCard, card.cardType != .stored else { return }
+        onCardBlockToggleTap(card.cardIdn, card.isLocked)
+    }
+
+    private func handleCardLimitManagementTap() {
+        guard let card = selectedCard, card.cardType != .stored else { return }
+        onCardLimitManagementTap(card.cardIdn, card.currency)
+    }
+
+    private func handleCardRequisitesTap() {
+        guard let card = selectedCard, card.cardType != .stored, let iban = card.iban, iban.isEmpty == false else { return }
+        onCardRequisitesTap(iban, card.currency)
+    }
+
+    private func handleCardDocumentsTap() {
+        guard let card = selectedCard, card.cardType != .stored else { return }
+        onCardDocumentsTap()
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from cards: [HomeCard]) -> RBHomeFlowCarouselModel {
@@ -278,7 +310,9 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 networkAsset: card.cardNetwork.assetName,
                 bottomLeadingLabel: bottomLeadingLabel,
                 isStored: card.cardType == .stored,
-                isFavorite: card.isFavorite
+                isFavorite: card.isFavorite,
+                isLocked: card.isLocked,
+                detailBadgeText: bottomLeadingLabel
             )
         })
     }
@@ -592,15 +626,32 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     }
 
     private var cardServiceActions: RBHomeFlowDetailActionsModel {
-        RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: [
-            .init(id: "svc-lock", title: "Kartı blokla",
-                  description: "Müvəqqəti istifadəni dayandır", icon: .iconLock, onTap: {}),
+        guard let selectedCard, selectedCard.cardType != .stored else {
+            return RBHomeFlowDetailActionsModel(items: [])
+        }
+
+        let blockTitle = selectedCard.isLocked ? "Kartın blokunu aç" : "Kartı blokla"
+        let blockDescription = selectedCard.isLocked
+        ? "Kartdan istifadəni yenidən aktiv et"
+        : "Müvəqqəti istifadəni dayandır"
+
+        return RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: [
+            .init(id: "svc-lock", title: blockTitle,
+                  description: blockDescription, icon: .iconLock, legacyIconAssetName: "card_report_icon", onTap: { [weak self] in
+                self?.handleCardBlockToggleTap()
+            }),
             .init(id: "svc-limit", title: "Limit idarəetməsi",
-                  description: "Gündəlik xərcləmə limitini dəyiş", icon: .iconFilterAdvanced, onTap: {}),
+                  description: "Gündəlik xərcləmə limitini dəyiş", icon: .iconFilterAdvanced, legacyIconAssetName: "card_limits_icon", onTap: { [weak self] in
+                self?.handleCardLimitManagementTap()
+            }),
             .init(id: "svc-details", title: "Kart rekvizitləri",
-                  description: "Tam kart məlumatlarını gör", icon: .iconPaper, onTap: {}),
+                  description: "Tam kart məlumatlarını gör", icon: .iconPaper, legacyIconAssetName: "card_account_info_icon", onTap: { [weak self] in
+                self?.handleCardRequisitesTap()
+            }),
             .init(id: "svc-statement", title: "Çıxarış sifariş et",
-                  description: "Hesab çıxarışını yüklə", icon: .iconPaperUpload, onTap: {})
+                  description: "Hesab çıxarışını yüklə", icon: .iconPaperUpload, legacyIconAssetName: "get_documents_icon", onTap: { [weak self] in
+                self?.handleCardDocumentsTap()
+            })
         ])
     }
 }

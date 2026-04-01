@@ -16,8 +16,15 @@ public final class RBHomeDIContainer {
         public let onEDVTap: () -> Void
         public let onPaymentsTap: (String) -> Void
         public let onTransferTap: () -> Void
+        public let onAccountRenameTap: (String, String, String?, String?, @escaping (String) -> Void) -> Void
+        public let onAccountRequisitesTap: (String, String) -> Void
+        public let onAccountDocumentsTap: () -> Void
         public let onCreditCardPaymentTap: (String) -> Void
         public let onInstallmentStatementTap: (Int) -> Void
+        public let onCardBlockToggleTap: (Int, Bool) -> Void
+        public let onCardLimitManagementTap: (Int, String) -> Void
+        public let onCardRequisitesTap: (String, String) -> Void
+        public let onCardDocumentsTap: () -> Void
         public let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
         public let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
         public let onLoanPaymentTap: (String) -> Void
@@ -37,8 +44,15 @@ public final class RBHomeDIContainer {
             onEDVTap: @escaping () -> Void = {},
             onPaymentsTap: @escaping (String) -> Void = { _ in },
             onTransferTap: @escaping () -> Void = {},
+            onAccountRenameTap: @escaping (String, String, String?, String?, @escaping (String) -> Void) -> Void = { _, _, _, _, _ in },
+            onAccountRequisitesTap: @escaping (String, String) -> Void = { _, _ in },
+            onAccountDocumentsTap: @escaping () -> Void = {},
             onCreditCardPaymentTap: @escaping (String) -> Void = { _ in },
             onInstallmentStatementTap: @escaping (Int) -> Void = { _ in },
+            onCardBlockToggleTap: @escaping (Int, Bool) -> Void = { _, _ in },
+            onCardLimitManagementTap: @escaping (Int, String) -> Void = { _, _ in },
+            onCardRequisitesTap: @escaping (String, String) -> Void = { _, _ in },
+            onCardDocumentsTap: @escaping () -> Void = {},
             onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onLoanPaymentTap: @escaping (String) -> Void = { _ in },
@@ -57,8 +71,15 @@ public final class RBHomeDIContainer {
             self.onEDVTap = onEDVTap
             self.onPaymentsTap = onPaymentsTap
             self.onTransferTap = onTransferTap
+            self.onAccountRenameTap = onAccountRenameTap
+            self.onAccountRequisitesTap = onAccountRequisitesTap
+            self.onAccountDocumentsTap = onAccountDocumentsTap
             self.onCreditCardPaymentTap = onCreditCardPaymentTap
             self.onInstallmentStatementTap = onInstallmentStatementTap
+            self.onCardBlockToggleTap = onCardBlockToggleTap
+            self.onCardLimitManagementTap = onCardLimitManagementTap
+            self.onCardRequisitesTap = onCardRequisitesTap
+            self.onCardDocumentsTap = onCardDocumentsTap
             self.onSplitBillTap = onSplitBillTap
             self.onChargebackTap = onChargebackTap
             self.onLoanPaymentTap = onLoanPaymentTap
@@ -163,6 +184,10 @@ public final class RBHomeDIContainer {
             onPaymentsTap: dependencies.onPaymentsTap,
             onCreditCardPaymentTap: dependencies.onCreditCardPaymentTap,
             onInstallmentStatementTap: dependencies.onInstallmentStatementTap,
+            onCardBlockToggleTap: dependencies.onCardBlockToggleTap,
+            onCardLimitManagementTap: dependencies.onCardLimitManagementTap,
+            onCardRequisitesTap: dependencies.onCardRequisitesTap,
+            onCardDocumentsTap: dependencies.onCardDocumentsTap,
             onSplitBillTap: dependencies.onSplitBillTap,
             onChargebackTap: dependencies.onChargebackTap
         )
@@ -174,7 +199,10 @@ public final class RBHomeDIContainer {
             fetchAccountsUseCase: makeFetchAccountsUseCase(),
             fetchRecordsUseCase: makeFetchAccountRecordsUseCase(),
             onPaymentsTap: dependencies.onPaymentsTap,
-            onTransferTap: dependencies.onTransferTap
+            onTransferTap: dependencies.onTransferTap,
+            onAccountRenameTap: dependencies.onAccountRenameTap,
+            onAccountRequisitesTap: dependencies.onAccountRequisitesTap,
+            onAccountDocumentsTap: dependencies.onAccountDocumentsTap
         )
     }
 

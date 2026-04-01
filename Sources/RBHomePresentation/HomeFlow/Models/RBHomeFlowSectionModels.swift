@@ -61,6 +61,9 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     public let title: String
     public let subtitle: String
     public let amount: String
+    public let detailCaption: String?
+    public let detailInfoTitle: String?
+    public let detailInfoValue: String?
     /// Asset name for card network logo (e.g. "ds_card_visa"). Nil for non-card segments.
     public let networkAsset: String?
     /// Optional label shown at the bottom-leading corner of the card (e.g. "Bonus: 120 xal").
@@ -68,16 +71,37 @@ public struct RBHomeFlowCarouselItem: Identifiable {
     /// True for stored/external-bank cards — renders recharge content instead of plastic.
     public let isStored: Bool
     public let isFavorite: Bool
+    public let isLocked: Bool
+    public let detailBadgeText: String?
 
-    public init(id: String, title: String, subtitle: String, amount: String, networkAsset: String? = nil, bottomLeadingLabel: String? = nil, isStored: Bool = false, isFavorite: Bool = false) {
+    public init(
+        id: String,
+        title: String,
+        subtitle: String,
+        amount: String,
+        detailCaption: String? = nil,
+        detailInfoTitle: String? = nil,
+        detailInfoValue: String? = nil,
+        networkAsset: String? = nil,
+        bottomLeadingLabel: String? = nil,
+        isStored: Bool = false,
+        isFavorite: Bool = false,
+        isLocked: Bool = false,
+        detailBadgeText: String? = nil
+    ) {
         self.id = id
         self.title = title
         self.subtitle = subtitle
         self.amount = amount
+        self.detailCaption = detailCaption
+        self.detailInfoTitle = detailInfoTitle
+        self.detailInfoValue = detailInfoValue
         self.networkAsset = networkAsset
         self.bottomLeadingLabel = bottomLeadingLabel
         self.isStored = isStored
         self.isFavorite = isFavorite
+        self.isLocked = isLocked
+        self.detailBadgeText = detailBadgeText
     }
 }
 
@@ -178,18 +202,41 @@ public struct RBHomeFlowDetailActionItem: Identifiable {
     public let title: String
     public let description: String
     public let icon: RBIcon
+    public let legacyIconAssetName: String?
     public let onTap: () -> Void
 
-    public init(id: String, title: String, description: String, icon: RBIcon, onTap: @escaping () -> Void) {
+    public init(
+        id: String,
+        title: String,
+        description: String,
+        icon: RBIcon,
+        legacyIconAssetName: String? = nil,
+        onTap: @escaping () -> Void
+    ) {
         self.id = id
         self.title = title
         self.description = description
         self.icon = icon
+        self.legacyIconAssetName = legacyIconAssetName
         self.onTap = onTap
     }
 
-    public init(id: String, title: String, description: String, systemImage: String, onTap: @escaping () -> Void) {
-        self.init(id: id, title: title, description: description, icon: .system(systemImage), onTap: onTap)
+    public init(
+        id: String,
+        title: String,
+        description: String,
+        systemImage: String,
+        legacyIconAssetName: String? = nil,
+        onTap: @escaping () -> Void
+    ) {
+        self.init(
+            id: id,
+            title: title,
+            description: description,
+            icon: .system(systemImage),
+            legacyIconAssetName: legacyIconAssetName,
+            onTap: onTap
+        )
     }
 }
 

@@ -43,12 +43,30 @@ extension RBHomeFlowPage {
                     },
                     content: { item in carouselCardContent(item: item, segment: segment) },
                     detailContent: { item in
-                        RBHomeFlowCarouselDetailPanel(
-                            segmentLabel: segment.title,
-                            title: item.title,
-                            subtitle: item.subtitle,
-                            amount: item.amount
-                        )
+                        if segment == .account {
+                            return AnyView(
+                                RBHomeFlowAccountCarouselDetailPanel(
+                                    caption: item.detailCaption ?? item.title,
+                                    amount: isBalanceVisible ? item.amount : "••••",
+                                    infoTitle: item.detailInfoTitle ?? "IBAN",
+                                    infoValue: item.detailInfoValue ?? item.subtitle
+                                )
+                            )
+                        } else {
+                            return AnyView(
+                                RBHomeFlowCarouselDetailPanel(
+                                    segmentLabel: segment.title,
+                                    title: item.title,
+                                    subtitle: item.subtitle,
+                                    amount: item.amount,
+                                    networkAsset: segment == .card ? item.networkAsset : nil,
+                                    badgeText: segment == .card ? (isBalanceVisible ? item.detailBadgeText : item.detailBadgeText.map { _ in "••••" }) : nil,
+                                    showsFavoriteState: segment == .card && item.isStored == false,
+                                    isFavorite: item.isFavorite,
+                                    isLocked: item.isLocked
+                                )
+                            )
+                        }
                     }
                 )
                 .padding(.horizontal, -RBHomeFlowLayout.pageHorizontalInset)
@@ -91,7 +109,17 @@ extension RBHomeFlowPage {
                 ),
                 onTapEye: { isBalanceVisible.toggle() }
             )
-        case .account, .deposit:
+        case .account:
+            RBProductCardDefaultContent(
+                model: .init(
+                    amount: amountText(item.amount),
+                    title: item.title,
+                    subtitle: item.subtitle,
+                    trailingIcons: .init(showsEye: true, isEyeOpen: isBalanceVisible, showsFavorite: false)
+                ),
+                onTapEye: { isBalanceVisible.toggle() }
+            )
+        case .deposit:
             RBProductCardDefaultContent(
                 model: .init(
                     amount: amountText(item.amount),

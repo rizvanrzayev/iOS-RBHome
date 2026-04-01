@@ -25,17 +25,19 @@ struct RBHomeFlowActionsPanelContent: View {
                 onPullDownAtTop: collapse
             ) {
                 RBHomeFlowDetailActionListSectionView(model: .init(items: model.items))
-                    .padding(.horizontal, 24)
                     .padding(.vertical, 16)
             }
+            .background(Color.rb.backgroundSecondary)
         case .empty(let title, let message):
             RBEmptyState(title: title, message: message, layout: .inline)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 16)
+                .background(Color.rb.backgroundSecondary)
         case .error(let title, let message):
             RBEmptyState(title: title, message: message, layout: .inline)
                 .frame(maxWidth: .infinity)
                 .padding(.top, 16)
+                .background(Color.rb.backgroundSecondary)
         }
     }
 }

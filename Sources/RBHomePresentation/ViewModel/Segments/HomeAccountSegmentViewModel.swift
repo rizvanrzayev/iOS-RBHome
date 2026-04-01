@@ -17,17 +17,26 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
     private let fetchRecordsUseCase: FetchAccountRecordsUseCase
     private let onPaymentsTap: (String) -> Void
     private let onTransferTap: () -> Void
+    private let onAccountRenameTap: (String, String, String?, String?, @escaping (String) -> Void) -> Void
+    private let onAccountRequisitesTap: (String, String) -> Void
+    private let onAccountDocumentsTap: () -> Void
 
     package init(
         fetchAccountsUseCase: FetchAccountsUseCase,
         fetchRecordsUseCase: FetchAccountRecordsUseCase,
         onPaymentsTap: @escaping (String) -> Void = { _ in },
-        onTransferTap: @escaping () -> Void = {}
+        onTransferTap: @escaping () -> Void = {},
+        onAccountRenameTap: @escaping (String, String, String?, String?, @escaping (String) -> Void) -> Void = { _, _, _, _, _ in },
+        onAccountRequisitesTap: @escaping (String, String) -> Void = { _, _ in },
+        onAccountDocumentsTap: @escaping () -> Void = {}
     ) {
         self.fetchAccountsUseCase = fetchAccountsUseCase
         self.fetchRecordsUseCase = fetchRecordsUseCase
         self.onPaymentsTap = onPaymentsTap
         self.onTransferTap = onTransferTap
+        self.onAccountRenameTap = onAccountRenameTap
+        self.onAccountRequisitesTap = onAccountRequisitesTap
+        self.onAccountDocumentsTap = onAccountDocumentsTap
     }
 
     func load() async {
@@ -110,7 +119,7 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
 
     var detailModel: RBHomeFlowAccountDetailModel {
         let selected = selectedAccount
-        let title = selected?.accountName ?? "Hesab"
+        let title = selectedAccountTitle
         return RBHomeFlowAccountDetailModel(
             title: title,
             cardsState: cardsState,
@@ -129,15 +138,64 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
         return iban.isEmpty ? (selectedAccount?.accountNumber ?? "") : iban
     }
 
+    private var selectedAccountTitle: String {
+        let nickname = selectedAccount?.nickname?.trimmingCharacters(in: .whitespacesAndNewlines) ?? ""
+        return nickname.isEmpty ? (selectedAccount?.accountName ?? "Hesab") : nickname
+    }
+
+    private func updateNickname(_ nickname: String) {
+        guard let selectedAccountNumber else { return }
+        accounts = accounts.map { account in
+            guard account.accountNumber == selectedAccountNumber else { return account }
+            return HomeAccount(
+                accountNumber: account.accountNumber,
+                accountName: account.accountName,
+                nickname: nickname,
+                iban: account.iban,
+                amount: account.amount,
+                currency: account.currency,
+                accountTypeRaw: account.accountTypeRaw
+            )
+        }
+        cardsState = .loaded(makeCarousel(from: accounts))
+    }
+
+    private func handleRenameTap() {
+        guard let account = selectedAccount else { return }
+        onAccountRenameTap(
+            account.accountNumber,
+            account.accountName,
+            account.nickname,
+            account.accountTypeRaw
+        ) { [weak self] nickname in
+            self?.updateNickname(nickname)
+        }
+    }
+
+    private func handleRequisitesTap() {
+        guard let account = selectedAccount, account.iban.isEmpty == false else { return }
+        onAccountRequisitesTap(account.iban, account.currency)
+    }
+
+    private func handleDocumentsTap() {
+        onAccountDocumentsTap()
+    }
+
     // MARK: - Mappers
 
     private func makeCarousel(from accounts: [HomeAccount]) -> RBHomeFlowCarouselModel {
         RBHomeFlowCarouselModel(items: accounts.map { acc in
-            RBHomeFlowCarouselItem(
+            let nickname = acc.nickname?.trimmingCharacters(in: .whitespacesAndNewlines)
+            let preferredTitle = (nickname?.isEmpty == false) ? (nickname ?? acc.accountName) : acc.accountName
+            let detailValue = acc.iban.isEmpty ? acc.accountNumber : acc.iban
+            return RBHomeFlowCarouselItem(
                 id: acc.accountNumber,
-                title: acc.accountName,
-                subtitle: acc.iban,
-                amount: HomeAmountFormatter.format(acc.amount, currency: acc.currency)
+                title: preferredTitle,
+                subtitle: acc.iban.isEmpty ? acc.accountNumber : acc.iban,
+                amount: HomeAmountFormatter.format(acc.amount, currency: acc.currency),
+                detailCaption: preferredTitle,
+                detailInfoTitle: "IBAN",
+                detailInfoValue: detailValue
             )
         })
     }
@@ -207,14 +265,18 @@ package final class HomeAccountSegmentViewModel: ObservableObject {
 
     private var accountServiceActions: RBHomeFlowDetailActionsModel {
         RBHomeFlowDetailActionsModel(title: "Hesab xidmətləri", items: [
+            .init(id: "svc-rename", title: "Hesab adını dəyiş",
+                  description: selectedAccount?.nickname ?? "", systemImage: "pencil", legacyIconAssetName: "accountInfoEdit", onTap: { [weak self] in
+                self?.handleRenameTap()
+            }),
             .init(id: "svc-requisites", title: "Rekvizitlər",
-                  description: "Hesab rekvizitlərini paylaş", systemImage: "doc.text.fill", onTap: {}),
-            .init(id: "svc-statement", title: "Çıxarış",
-                  description: "Hesab çıxarışını yüklə", systemImage: "arrow.down.doc.fill", onTap: {}),
-            .init(id: "svc-transfer", title: "Köçürmə",
-                  description: "Hesabdan köçürmə et", systemImage: "arrow.left.arrow.right", onTap: {}),
-            .init(id: "svc-close", title: "Hesabı bağla",
-                  description: "Hesabı bağlamaq üçün müraciət et", systemImage: "xmark.circle.fill", onTap: {})
+                  description: "Hesab nömrəsi, IBAN və digər məlumatlar", systemImage: "doc.text.fill", legacyIconAssetName: "requisities", onTap: { [weak self] in
+                self?.handleRequisitesTap()
+            }),
+            .init(id: "svc-documents", title: "Çıxarış və arayışlar",
+                  description: "Arayış və çıxarış növlərini seç", systemImage: "arrow.down.doc.fill", legacyIconAssetName: "account_info_documents", onTap: { [weak self] in
+                self?.handleDocumentsTap()
+            })
         ])
     }
 }
