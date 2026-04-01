@@ -5,18 +5,21 @@ import RBHomePresentation
 public struct HomeRootView: View {
     @StateObject private var viewModel: HomeViewModel
     private let onClose: () -> Void
+    private let onModeChange: ((RBHomeFlowMode) -> Void)?
 
     public init(
         diContainer: RBHomeDIContainer,
-        onClose: @escaping () -> Void = {}
+        onClose: @escaping () -> Void = {},
+        onModeChange: ((RBHomeFlowMode) -> Void)? = nil
     ) {
         _viewModel = StateObject(wrappedValue: diContainer.makeHomeViewModel())
         self.onClose = onClose
+        self.onModeChange = onModeChange
     }
 
     public var body: some View {
         RBAppRoot {
-            HomeContentView(viewModel: viewModel)
+            HomeContentView(viewModel: viewModel, onModeChange: onModeChange)
                 .onAppear { viewModel.onAppear() }
         }
     }
@@ -25,12 +28,16 @@ public struct HomeRootView: View {
 private struct HomeContentView: View {
     @ObservedObject var viewModel: HomeViewModel
     @EnvironmentObject private var overlayManager: RBOverlayManager
+    let onModeChange: ((RBHomeFlowMode) -> Void)?
 
     @State private var mode: RBHomeFlowMode = .home
     @State private var selectedProductId: String?
 
     var body: some View {
         contentView
+            .onChange(of: mode) { newMode in
+                onModeChange?(newMode)
+            }
             .onChange(of: viewModel.pendingOnboardingModals) { modals in
                 for modal in modals {
                     presentOnboardingModal(modal, overlayManager: overlayManager, viewModel: viewModel)
