@@ -36,6 +36,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     private let onCardLimitManagementTap: (Int, String) -> Void
     private let onCardRequisitesTap: (String, String) -> Void
     private let onCardDocumentsTap: () -> Void
+    private let onCardDetailSectionTap: (HomeCardDetailSectionContext) -> Void
     private let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
     private let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
 
@@ -61,6 +62,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onCardLimitManagementTap: @escaping (Int, String) -> Void = { _, _ in },
         onCardRequisitesTap: @escaping (String, String) -> Void = { _, _ in },
         onCardDocumentsTap: @escaping () -> Void = {},
+        onCardDetailSectionTap: @escaping (HomeCardDetailSectionContext) -> Void = { _ in },
         onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
         onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in }
     ) {
@@ -83,6 +85,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         self.onCardLimitManagementTap = onCardLimitManagementTap
         self.onCardRequisitesTap = onCardRequisitesTap
         self.onCardDocumentsTap = onCardDocumentsTap
+        self.onCardDetailSectionTap = onCardDetailSectionTap
         self.onSplitBillTap = onSplitBillTap
         self.onChargebackTap = onChargebackTap
     }
@@ -304,6 +307,29 @@ package final class HomeCardSegmentViewModel: ObservableObject {
         onCardDocumentsTap()
     }
 
+    private func handleCardDetailSectionTap(sectionID: Int) {
+        guard let card = selectedCard else { return }
+        onCardDetailSectionTap(
+            HomeCardDetailSectionContext(
+                sectionID: sectionID,
+                cardIdn: card.cardIdn,
+                cardName: card.name,
+                maskedPan: card.maskedPan,
+                currency: card.currency,
+                iban: card.iban,
+                isLocked: card.isLocked,
+                isRecharge: card.cardType == .stored,
+                cardType: card.cardType,
+                cardDetectionTypeRaw: cardDetectionTypeRaw(for: card),
+                token: card.token,
+                isJunior: card.isJunior,
+                isInstallmentCard: card.installmentCard,
+                isAdvanceLoan: card.isAdvanceLoan,
+                hasTurnover: card.hasTurnover
+            )
+        )
+    }
+
     private func handleCardApplePayTap() {
         guard let card = selectedCard, card.cardType != .stored else { return }
         onCardApplePayTap(card.cardIdn, card.maskedPan, cardDetectionTypeRaw(for: card))
@@ -517,7 +543,10 @@ package final class HomeCardSegmentViewModel: ObservableObject {
                 interestAmount: card.interestAmount,
                 minimumPayment: card.minimumPayment,
                 monthlyDebt: card.monthlyDebt,
-                installmentCard: card.installmentCard
+                installmentCard: card.installmentCard,
+                isJunior: card.isJunior,
+                hasTurnover: card.hasTurnover,
+                isAdvanceLoan: card.isAdvanceLoan
             )
         }
         rebuildCarousel()
@@ -625,7 +654,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
 
         var items: [RBHomeFlowQuickActionItem] = []
 
-        if selectedCard.isLocked == false {
+        if selectedCard.isLocked == false, selectedCard.isJunior == false {
             items.append(
                 .init(id: "dqa-apple-pay", title: "Apple Pay", icon: .asset("apple_pay_icon", bundle: .module), iconSize: .custom(40), onTap: { [weak self] in
                     self?.handleCardApplePayTap()
@@ -650,7 +679,7 @@ package final class HomeCardSegmentViewModel: ObservableObject {
             )
         )
 
-        if selectedCard.installmentCard, selectedCard.isLocked == false {
+        if selectedCard.installmentCard, selectedCard.isLocked == false, selectedCard.isJunior == false {
             items.append(
                 .init(id: "dqa-card-to-card", title: "Karta köçürmə", icon: .asset("quickActionToCard", bundle: .module), iconSize: .custom(36), onTap: { [weak self] in
                     self?.handleCardToCardTap()
@@ -662,32 +691,131 @@ package final class HomeCardSegmentViewModel: ObservableObject {
     }
 
     private var cardServiceActions: RBHomeFlowDetailActionsModel {
-        guard let selectedCard, selectedCard.cardType != .stored else {
+        guard let selectedCard else {
             return RBHomeFlowDetailActionsModel(items: [])
         }
 
-        let blockTitle = selectedCard.isLocked ? "Kartın blokunu aç" : "Kartı blokla"
-        let blockDescription = selectedCard.isLocked
-        ? "Kartdan istifadəni yenidən aktiv et"
-        : "Müvəqqəti istifadəni dayandır"
+        if selectedCard.cardType == .stored {
+            return RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: [
+                .init(
+                    id: "svc-recharge-rename",
+                    title: "Kart adını dəyiş",
+                    description: "Stored kart adını yenilə",
+                    icon: .iconEdit,
+                    legacyIconAssetName: "recharge_card_change_name_icon",
+                    onTap: { [weak self] in
+                        self?.handleCardDetailSectionTap(sectionID: 6)
+                    }
+                )
+            ])
+        }
 
-        return RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: [
-            .init(id: "svc-lock", title: blockTitle,
-                  description: blockDescription, icon: .iconLock, legacyIconAssetName: "card_report_icon", onTap: { [weak self] in
-                self?.handleCardBlockToggleTap()
-            }),
-            .init(id: "svc-limit", title: "Limit idarəetməsi",
-                  description: "Gündəlik xərcləmə limitini dəyiş", icon: .iconFilterAdvanced, legacyIconAssetName: "card_limits_icon", onTap: { [weak self] in
-                self?.handleCardLimitManagementTap()
-            }),
-            .init(id: "svc-details", title: "Kart rekvizitləri",
-                  description: "Tam kart məlumatlarını gör", icon: .iconPaper, legacyIconAssetName: "card_account_info_icon", onTap: { [weak self] in
-                self?.handleCardRequisitesTap()
-            }),
-            .init(id: "svc-statement", title: "Çıxarış sifariş et",
-                  description: "Hesab çıxarışını yüklə", icon: .iconPaperUpload, legacyIconAssetName: "get_documents_icon", onTap: { [weak self] in
-                self?.handleCardDocumentsTap()
-            })
-        ])
+        var items: [RBHomeFlowDetailActionItem] = [
+            .init(
+                id: "svc-card-info",
+                title: "Kart məlumatları",
+                description: "Rekvizitlər, çıxarışlar, faiz və kart adını dəyiş",
+                icon: .iconInfoSquare,
+                legacyIconAssetName: "card_info_detail_icon",
+                onTap: { [weak self] in
+                    self?.handleCardDetailSectionTap(sectionID: 0)
+                }
+            )
+        ]
+
+        if selectedCard.cardType == .credit || selectedCard.installmentCard || selectedCard.isAdvanceLoan {
+            let description: String
+            if selectedCard.installmentCard {
+                description = "Taksit və kredit məlumatlarını göstər"
+            } else if selectedCard.cardType == .credit {
+                description = "Kredit xətti və borc məlumatlarını göstər"
+            } else {
+                description = "Advance loan məlumatlarını göstər"
+            }
+
+            items.append(
+                .init(
+                    id: "svc-loan-info",
+                    title: "Kredit məlumatları",
+                    description: description,
+                    icon: .iconPaper,
+                    legacyIconAssetName: "card_info_credit_detail_icon",
+                    onTap: { [weak self] in
+                        self?.handleCardDetailSectionTap(sectionID: 3)
+                    }
+                )
+            )
+        }
+
+        items.append(
+            .init(
+                id: "svc-limits",
+                title: "Limitlər",
+                description: "Xərc, pulsuz əməliyyat və uzatma limitlərini idarə et",
+                icon: .iconFilterAdvanced,
+                legacyIconAssetName: "card_info_limits_icon",
+                onTap: { [weak self] in
+                    self?.handleCardDetailSectionTap(sectionID: 2)
+                }
+            )
+        )
+
+        items.append(
+            .init(
+                id: "svc-security",
+                title: "Təhlükəsizlik",
+                description: "PIN, kart report və təhlükəsizlik seçimləri",
+                icon: .iconShieldDone,
+                legacyIconAssetName: "card_info_security_icon",
+                onTap: { [weak self] in
+                    self?.handleCardDetailSectionTap(sectionID: 1)
+                }
+            )
+        )
+
+        if selectedCard.isJunior == false {
+            items.append(
+                .init(
+                    id: "svc-carbon",
+                    title: "Karbon kalkulyatoru",
+                    description: "Karbon emissiyası statistikasını göstər",
+                    icon: .iconChart,
+                    legacyIconAssetName: "card_info_carbon_cloud",
+                    onTap: { [weak self] in
+                        self?.handleCardDetailSectionTap(sectionID: 10)
+                    }
+                )
+            )
+        }
+
+        items.append(
+            .init(
+                id: "svc-sms",
+                title: "SMS bildirişləri",
+                description: "Kart üzrə SMS status və xidmət məlumatları",
+                icon: .iconMessage,
+                legacyIconAssetName: "card_info_sms_icon",
+                onTap: { [weak self] in
+                    self?.handleCardDetailSectionTap(sectionID: 5)
+                }
+            )
+        )
+
+        if selectedCard.cardNetwork == .visa {
+            items.append(
+                .init(
+                    id: "svc-subscriptions",
+                    title: "Abunəliklər",
+                    description: "Visa abunəlik və recurring ödənişləri göstər",
+                    icon: .iconPaper,
+                    legacyIconAssetName: "card_info_subscribe_icon",
+                    onTap: { [weak self] in
+                        self?.handleCardDetailSectionTap(sectionID: 4)
+                    }
+                )
+            )
+        }
+
+        return RBHomeFlowDetailActionsModel(title: "Kart xidmətləri", items: items)
     }
 }

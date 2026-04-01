@@ -53,10 +53,13 @@ struct HomePlasticCardDTO: Decodable {
     let favoritePlasticCard: Bool?
     let hasCashbackRule: Bool?
     let cardDetectionType: Int?
+    let cardProduct: String?
+    let hasTurnover: Bool?
     let interestAmount: Double?
     let minimumPayment: Double?
     let monthlyDebt: Double?
     let installmentCard: Bool?
+    let isAdvanceLoan: Bool?
 
     enum CodingKeys: String, CodingKey {
         case cardIdn = "CardIdn"
@@ -71,10 +74,13 @@ struct HomePlasticCardDTO: Decodable {
         case favoritePlasticCard = "FavoritePlasticCard"
         case hasCashbackRule = "HasCashbackRule"
         case cardDetectionType = "CardDetectionType"
+        case cardProduct = "CardProduct"
+        case hasTurnover = "HasTurnover"
         case interestAmount = "InterestAmount"
         case minimumPayment = "MinimumPayment"
         case monthlyDebt = "MonthlyDebt"
         case installmentCard = "InstallmentCard"
+        case isAdvanceLoan = "IsAdvanceLoan"
     }
 
     func toEntity() -> HomeCard {
@@ -109,7 +115,10 @@ struct HomePlasticCardDTO: Decodable {
             interestAmount: interestAmount,
             minimumPayment: minimumPayment,
             monthlyDebt: monthlyDebt,
-            installmentCard: installmentCard ?? false
+            installmentCard: installmentCard ?? false,
+            isJunior: cardProduct == "KartmaneJunior",
+            hasTurnover: hasTurnover ?? false,
+            isAdvanceLoan: isAdvanceLoan ?? false
         )
     }
 }

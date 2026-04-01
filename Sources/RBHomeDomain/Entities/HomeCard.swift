@@ -35,6 +35,12 @@ public struct HomeCard: Sendable {
     public let monthlyDebt: Double?
     /// True when the card is an installment card.
     public let installmentCard: Bool
+    /// True when the card belongs to the junior product family.
+    public let isJunior: Bool
+    /// True when turnover-based limit extensions are available.
+    public let hasTurnover: Bool
+    /// True when card opens advance-loan flow instead of credit detail.
+    public let isAdvanceLoan: Bool
 
     public init(
         cardIdn: Int,
@@ -52,7 +58,10 @@ public struct HomeCard: Sendable {
         interestAmount: Double? = nil,
         minimumPayment: Double? = nil,
         monthlyDebt: Double? = nil,
-        installmentCard: Bool = false
+        installmentCard: Bool = false,
+        isJunior: Bool = false,
+        hasTurnover: Bool = false,
+        isAdvanceLoan: Bool = false
     ) {
         self.cardIdn = cardIdn
         self.token = token
@@ -70,5 +79,8 @@ public struct HomeCard: Sendable {
         self.minimumPayment = minimumPayment
         self.monthlyDebt = monthlyDebt
         self.installmentCard = installmentCard
+        self.isJunior = isJunior
+        self.hasTurnover = hasTurnover
+        self.isAdvanceLoan = isAdvanceLoan
     }
 }

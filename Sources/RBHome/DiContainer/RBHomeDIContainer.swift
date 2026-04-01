@@ -28,6 +28,7 @@ public final class RBHomeDIContainer {
         public let onCardLimitManagementTap: (Int, String) -> Void
         public let onCardRequisitesTap: (String, String) -> Void
         public let onCardDocumentsTap: () -> Void
+        public let onCardDetailSectionTap: (HomeCardDetailSectionContext) -> Void
         public let onSplitBillTap: (HomeCardTransactionActionPayload) -> Void
         public let onChargebackTap: (HomeCardTransactionActionPayload) -> Void
         public let onLoanPaymentTap: (String) -> Void
@@ -61,6 +62,7 @@ public final class RBHomeDIContainer {
             onCardLimitManagementTap: @escaping (Int, String) -> Void = { _, _ in },
             onCardRequisitesTap: @escaping (String, String) -> Void = { _, _ in },
             onCardDocumentsTap: @escaping () -> Void = {},
+            onCardDetailSectionTap: @escaping (HomeCardDetailSectionContext) -> Void = { _ in },
             onSplitBillTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onChargebackTap: @escaping (HomeCardTransactionActionPayload) -> Void = { _ in },
             onLoanPaymentTap: @escaping (String) -> Void = { _ in },
@@ -93,6 +95,7 @@ public final class RBHomeDIContainer {
             self.onCardLimitManagementTap = onCardLimitManagementTap
             self.onCardRequisitesTap = onCardRequisitesTap
             self.onCardDocumentsTap = onCardDocumentsTap
+            self.onCardDetailSectionTap = onCardDetailSectionTap
             self.onSplitBillTap = onSplitBillTap
             self.onChargebackTap = onChargebackTap
             self.onLoanPaymentTap = onLoanPaymentTap
@@ -206,6 +209,7 @@ public final class RBHomeDIContainer {
             onCardLimitManagementTap: dependencies.onCardLimitManagementTap,
             onCardRequisitesTap: dependencies.onCardRequisitesTap,
             onCardDocumentsTap: dependencies.onCardDocumentsTap,
+            onCardDetailSectionTap: dependencies.onCardDetailSectionTap,
             onSplitBillTap: dependencies.onSplitBillTap,
             onChargebackTap: dependencies.onChargebackTap
         )
